@@ -4,29 +4,34 @@
   scroll-behavior: smooth;
   box-sizing: border-box;
 }
+
 body {
   background: #f2f3fb;
   width: 100%;
   min-height: 100vh;
   font-family: "Roboto", sans-serif;
 }
+
 body::-webkit-scrollbar {
   display: none;
 }
+
 a {
   color: #343b45;
   text-decoration: none;
 }
+
 ul {
   list-style-type: none;
 }
 
-/***wrapper maintain page content width***/
+/*** wrapper maintain page content width ***/
 .wrapper {
   padding: 1.5rem 0;
   margin: auto;
   width: 85%;
 }
+
 .container {
   text-align: center;
   display: flex;
@@ -36,7 +41,7 @@ ul {
   width: 100%;
 }
 
-/*****Picture and name*****/
+/***** Picture and name *****/
 .picture {
   height: 9rem;
   width: 9rem;
@@ -44,10 +49,13 @@ ul {
   border-radius: 100%;
   overflow: hidden;
 }
+
 .picture img {
   height: 9rem;
   width: 9rem;
+  object-fit: cover;
 }
+
 .name {
   padding: 1rem 0;
   font-size: 2rem;
@@ -56,36 +64,40 @@ ul {
   color: #00445a;
 }
 
-/**On load name effect**/
-.name>span {
+/** On load name effect **/
+.name > span {
   display: inline-block;
   overflow: hidden;
-  transition: .2s transform
+  transition: 0.2s transform;
 }
 
-.name>span span {
+.name > span span {
   display: inline-block;
-  transition: .5s transform cubic-bezier(.34, 1.56, .64, 1);
+  transition: 0.5s transform cubic-bezier(.34, 1.56, .64, 1);
 }
-.name>span:nth-child(odd) {
+
+.name > span:nth-child(odd) {
   transform: translateY(50%);
 }
-.name>span:nth-child(odd) span {
+
+.name > span:nth-child(odd) span {
   transform: translateY(-100%);
 }
-.name>span:nth-child(even) {
+
+.name > span:nth-child(even) {
   transform: translateY(-50%);
 }
-.name>span:nth-child(even) span {
+
+.name > span:nth-child(even) span {
   transform: translateY(100%);
 }
 
-.name.loaded>span,
-.name.loaded>span span {
+.name.loaded > span,
+.name.loaded > span span {
   transform: translateY(0);
 }
 
-/*****Few personal details*****/
+/***** Few personal details *****/
 .info-box {
   width: 100%;
   background-color: #f5f5fc;
@@ -96,7 +108,7 @@ ul {
   overflow: hidden;
   position: relative;
 }
-/*if toggle btn click then add .active*/
+
 .info-box .toggle {
   padding: 0.94rem;
   width: 100%;
@@ -107,46 +119,51 @@ ul {
   top: 0;
   right: 0;
 }
+
 .info-box.active {
   height: auto;
   padding-bottom: 0;
   overflow: visible;
 }
-/***toggle button rotate on click***/
+
 .info-box .toggle i {
   float: right;
   transition: 0.25s;
 }
+
 .info-box.active .toggle > i {
-  transition: 0.25s;
   transform: rotate(-180deg);
 }
 
-/***details***/
+/*** details ***/
 .details {
   border-top: 1px solid rgba(0, 0, 0, 0.1);
   width: 95%;
   margin: auto;
 }
+
 .details ul {
   display: flex;
   flex-direction: column;
   padding: 0.5rem 0;
   text-align: left;
 }
+
 .details ul li {
   color: #4b4c4f;
   padding: 0.5rem;
 }
+
 .details b {
   color: #00445a;
   letter-spacing: 1.3px;
 }
+
 .details .about {
   line-height: 1.5rem;
 }
 
-/***Project section***/
+/*** Project section ***/
 .projects {
   width: 100%;
 }
@@ -159,7 +176,7 @@ ul {
 }
 
 .project:not(:last-child) {
-      border-bottom: 1px solid #e5e7eb;
+  border-bottom: 1px solid #e5e7eb;
 }
 
 .project i {
@@ -186,16 +203,21 @@ ul {
   color: #909090;
 }
 
-/*****All social media btn*****/
+/***** Social buttons *****/
 .social-media {
   width: 100%;
 }
 
-.social-media div {
+.social-media a {
+  display: block;
+  width: 100%;
+}
+
+.social-media a div,
+.email-button {
   width: 100%;
   margin: 1rem 0;
   border-radius: 0.5rem;
-  backdrop-filter: blur(10px);
   border: 2px solid #343b45;
   background-color: #f5f5fc;
   padding: 1rem 0;
@@ -204,53 +226,52 @@ ul {
   align-items: center;
   justify-content: center;
   gap: 0.6rem;
+  color: #343b45;
 }
-.social-media div:hover {
+
+.social-media a div:hover,
+.email-button:hover {
   color: #ffffff;
   background-color: #343b45;
 }
 
-/***responsive for desktop***/
-@media only screen and (min-width: 1000px) {
-  .wrapper {
-    width: 55%;
-  }
-}
-
+/***** Email dropdown *****/
 .email-wrapper {
   width: 100%;
 }
 
 .email-button {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 12px;
-  width: 100%;
-  padding: 20px;
-  border: 3px solid #444b55;
-  border-radius: 14px;
   cursor: pointer;
-  box-sizing: border-box;
-  font-size: 1.2rem;
-  font-weight: 500;
 }
 
 .email-arrow {
-  margin-left: 8px;
+  transition: transform 0.25s ease;
+}
+
+.email-wrapper.open .email-arrow {
+  transform: rotate(-180deg);
 }
 
 .email-dropdown {
   display: none;
-  margin-top: 10px;
-  padding: 18px;
-  border: 3px solid #444b55;
-  border-radius: 14px;
+  width: 100%;
+  margin-top: 0;
+  margin-bottom: 1rem;
+  border-radius: 0.5rem;
+  border: 2px solid #343b45;
+  background-color: #f5f5fc;
+  padding: 1rem 0;
   text-align: center;
-  font-size: 1.05rem;
-  box-sizing: border-box;
+  color: #343b45;
 }
 
-.show-email {
+.email-dropdown.show-email {
   display: block;
+}
+
+/*** responsive for desktop ***/
+@media only screen and (min-width: 1000px) {
+  .wrapper {
+    width: 55%;
+  }
 }
