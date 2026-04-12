@@ -3,7 +3,6 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="theme-color" content="#f2f3fb" />
     <title>Parker Rubin</title>
 
     <link
@@ -22,18 +21,18 @@
     <div class="wrapper">
       <div class="container">
 
+        <!-- Picture -->
         <div class="picture">
-          <img
-            src="assets/profile-picture.webp"
-            alt="Parker Rubin's photo"
-          />
+          <img src="assets/profile-picture.webp" alt="Parker Rubin" />
         </div>
 
+        <!-- Name -->
         <div class="name" translate="no">
           <span><span>Par</span></span><span><span>ker</span></span>
           <span><span>Rub</span></span><span><span>in</span></span>
         </div>
 
+        <!-- About -->
         <div class="info-box">
           About me
           <div class="toggle" onclick="vibrate()">
@@ -45,26 +44,21 @@
             <div class="details">
               <ul>
                 <li class="about">
-                  Hey, I’m Parker Rubin. I’m a Computer Science student at FAU and a SOC Analyst intern with hands-on experience in cybersecurity, AI tools, and system-level work. I’ve handled thousands of alerts, worked with EDR tools, and enjoy building things that actually solve problems.
+                  Hey, I’m Parker Rubin. I’m a Computer Science student at FAU and a SOC Analyst intern. I’ve worked thousands of alerts, used EDR tools, and enjoy building AI tools and solving real-world problems.
                   <br /><br />
-                  I’m especially interested in DFIR, blue team operations, and building AI systems.
+                  I’m especially interested in DFIR, blue team operations, and system-level development.
                 </li>
               </ul>
             </div>
           </div>
         </div>
 
+        <!-- Socials -->
         <div class="social-media">
-          <div class="email-wrapper">
-            <div class="email-button" onclick="toggleEmail()">
-              <i class="fa-solid fa-envelope"></i>Email
-              <i class="fa-solid fa-chevron-down email-arrow"></i>
-            </div>
 
-            <div id="emailBox" class="email-dropdown">
-              pdrrubinn@gmail.com
-            </div>
-          </div>
+          <a href="mailto:pdrrubinn@gmail.com">
+            <div><i class="fa-solid fa-envelope"></i>Email</div>
+          </a>
 
           <a href="https://github.com/ParkerRubin" target="_blank">
             <div><i class="fa-brands fa-github"></i>GitHub</div>
@@ -73,21 +67,12 @@
           <a href="https://www.linkedin.com/in/parker-rubin-51b239324" target="_blank">
             <div><i class="fa-brands fa-linkedin-in"></i>LinkedIn</div>
           </a>
+
         </div>
 
       </div>
     </div>
 
     <script src="assets/js/script.js"></script>
-
-<script>
-  function toggleEmail() {
-    const box = document.getElementById("emailBox");
-    const wrapper = document.querySelector(".email-wrapper");
-
-    box.classList.toggle("show-email");
-    wrapper.classList.toggle("open");
-  }
-</script>
   </body>
 </html>
