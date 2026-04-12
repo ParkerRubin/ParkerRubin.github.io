@@ -1,23 +1,26 @@
+/*more details button*/
 const container = document.querySelector(".info-box");
 const toggle = document.querySelector(".toggle");
-
 toggle.addEventListener("click", () => {
   container.classList.toggle("active");
 });
 
+/*vibration*/
 function vibrate() {
-  if (navigator.vibrate) navigator.vibrate(6);
+  navigator.vibrate(6);
 }
 
-const socialMediaLinks = document.querySelectorAll(".social-media a");
+// Zoom in up effect add in every social media button one by one
+const socialMediaLinks = document.querySelectorAll(".social-media div");
 
+// ON SCROLL REVEAL SMALL CARDS
 ScrollReveal().reveal(socialMediaLinks, {
-  duration: 800,
+  duration: 1000,
   opacity: 0,
   distance: "30%",
   origin: "bottom",
+  scale: 0.9,
 });
 
-setTimeout(() => {
-  document.querySelector(".name").classList.add("loaded");
-}, 300);
+// on load name effect 
+setTimeout(() => document.querySelector('.name').classList.add('loaded'), 500);
