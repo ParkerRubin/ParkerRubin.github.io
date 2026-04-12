@@ -80,11 +80,14 @@
 
     <script src="assets/js/script.js"></script>
 
-    <script>
-      function toggleEmail() {
-        const box = document.getElementById("emailBox");
-        box.classList.toggle("show-email");
-      }
-    </script>
+<script>
+  function toggleEmail() {
+    const box = document.getElementById("emailBox");
+    const wrapper = document.querySelector(".email-wrapper");
+
+    box.classList.toggle("show-email");
+    wrapper.classList.toggle("open");
+  }
+</script>
   </body>
 </html>
