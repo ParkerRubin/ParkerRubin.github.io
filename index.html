@@ -22,7 +22,6 @@
     <div class="wrapper">
       <div class="container">
 
-        <!-- Profile Picture -->
         <div class="picture">
           <img
             src="assets/profile-picture.webp"
@@ -30,13 +29,11 @@
           />
         </div>
 
-        <!-- Name -->
         <div class="name" translate="no">
           <span><span>Par</span></span><span><span>ker</span></span>
           <span><span>Rub</span></span><span><span>in</span></span>
         </div>
 
-        <!-- About -->
         <div class="info-box">
           About me
           <div class="toggle" onclick="vibrate()">
@@ -57,31 +54,25 @@
           </div>
         </div>
 
-        <!-- Socials -->
         <div class="social-media">
-
-          <!-- Email Dropdown -->
-          <div class="info-box" style="width: 100%;">
-            Email
-            <div class="toggle" onclick="toggleEmail()">
-              <i class="fa-solid fa-chevron-down"></i>
+          <div class="email-wrapper">
+            <div class="email-button" onclick="toggleEmail()">
+              <i class="fa-solid fa-envelope"></i>Email
+              <i class="fa-solid fa-chevron-down email-arrow"></i>
             </div>
 
-            <div id="emailBox" style="display: none; margin-top: 12px;">
-              <p style="margin: 0;">pdrrubinn@gmail.com</p>
+            <div id="emailBox" class="email-dropdown">
+              pdrrubinn@gmail.com
             </div>
           </div>
 
-          <!-- GitHub -->
           <a href="https://github.com/ParkerRubin" target="_blank">
             <div><i class="fa-brands fa-github"></i>GitHub</div>
           </a>
 
-          <!-- LinkedIn -->
           <a href="https://www.linkedin.com/in/parker-rubin-51b239324" target="_blank">
             <div><i class="fa-brands fa-linkedin-in"></i>LinkedIn</div>
           </a>
-
         </div>
 
       </div>
@@ -92,10 +83,7 @@
     <script>
       function toggleEmail() {
         const box = document.getElementById("emailBox");
-        box.style.display =
-          box.style.display === "none" || box.style.display === ""
-            ? "block"
-            : "none";
+        box.classList.toggle("show-email");
       }
     </script>
   </body>
