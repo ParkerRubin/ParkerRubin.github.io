@@ -1,4 +1,3 @@
-/* more details button */
 const container = document.querySelector(".info-box");
 const toggle = document.querySelector(".toggle");
 
@@ -6,21 +5,19 @@ toggle.addEventListener("click", () => {
   container.classList.toggle("active");
 });
 
-/* vibration */
 function vibrate() {
-  navigator.vibrate(6);
+  if (navigator.vibrate) navigator.vibrate(6);
 }
 
-/* only reveal the actual visible social buttons */
-const socialMediaLinks = document.querySelectorAll(".social-media div");
+const socialMediaLinks = document.querySelectorAll(".social-media a");
 
 ScrollReveal().reveal(socialMediaLinks, {
-  duration: 1000,
+  duration: 800,
   opacity: 0,
   distance: "30%",
   origin: "bottom",
-  scale: 0.9,
 });
 
-/* on load name effect */
-setTimeout(() => document.querySelector(".name").classList.add("loaded"), 500);
+setTimeout(() => {
+  document.querySelector(".name").classList.add("loaded");
+}, 300);
