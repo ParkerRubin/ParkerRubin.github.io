@@ -11,8 +11,8 @@ function vibrate() {
   navigator.vibrate(6);
 }
 
-/* only reveal the actual visible social buttons */
-const socialMediaLinks = document.querySelectorAll(".social-media a, .email-button");
+/* reveal only visible social buttons */
+const socialMediaLinks = document.querySelectorAll(".email-button, .social-media a");
 
 ScrollReveal().reveal(socialMediaLinks, {
   duration: 1000,
