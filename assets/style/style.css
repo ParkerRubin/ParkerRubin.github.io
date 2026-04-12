@@ -37,13 +37,11 @@ ul {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  width: 100%;
 }
 
 .picture {
   height: 9rem;
   width: 9rem;
-  background-color: #52c8ff;
   border-radius: 100%;
   overflow: hidden;
 }
@@ -57,7 +55,6 @@ ul {
 .name {
   padding: 1rem 0;
   font-size: 2rem;
-  letter-spacing: 1.5px;
   font-weight: bold;
   color: #00445a;
 }
@@ -65,32 +62,15 @@ ul {
 .name > span {
   display: inline-block;
   overflow: hidden;
-  transition: 0.2s transform;
 }
 
 .name > span span {
   display: inline-block;
-  transition: 0.5s transform cubic-bezier(.34, 1.56, .64, 1);
-}
-
-.name > span:nth-child(odd) {
-  transform: translateY(50%);
-}
-
-.name > span:nth-child(odd) span {
-  transform: translateY(-100%);
-}
-
-.name > span:nth-child(even) {
-  transform: translateY(-50%);
-}
-
-.name > span:nth-child(even) span {
   transform: translateY(100%);
+  transition: 0.4s;
 }
 
-.name.loaded > span,
-.name.loaded > span span {
+.name.loaded span span {
   transform: translateY(0);
 }
 
@@ -100,65 +80,34 @@ ul {
   border-radius: 0.5rem;
   border: 2px solid #343b45;
   padding: 1rem 0;
-  height: 3.45rem;
+  height: 3.5rem;
   overflow: hidden;
   position: relative;
-}
-
-.info-box .toggle {
-  padding: 0.94rem;
-  width: 100%;
-  height: 3.36rem;
-  cursor: pointer;
-  position: absolute;
-  font-size: 1.3rem;
-  top: 0;
-  right: 0;
+  margin-top: 1rem;
 }
 
 .info-box.active {
   height: auto;
-  padding-bottom: 0;
-  overflow: visible;
 }
 
-.info-box .toggle i {
-  float: right;
-  transition: 0.25s;
-}
-
-.info-box.active .toggle > i {
-  transform: rotate(-180deg);
+.toggle {
+  position: absolute;
+  right: 10px;
+  top: 10px;
+  cursor: pointer;
 }
 
 .details {
-  border-top: 1px solid rgba(0, 0, 0, 0.1);
-  width: 95%;
-  margin: auto;
+  margin-top: 1rem;
+  padding: 0 1rem;
 }
 
-.details ul {
-  display: flex;
-  flex-direction: column;
-  padding: 0.5rem 0;
+.about {
+  line-height: 1.5rem;
   text-align: left;
 }
 
-.details ul li {
-  color: #4b4c4f;
-  padding: 0.5rem;
-}
-
-.details .about {
-  line-height: 1.5rem;
-}
-
 .social-media {
-  width: 100%;
-}
-
-.social-media a {
-  display: block;
   width: 100%;
 }
 
@@ -168,71 +117,11 @@ ul {
   border-radius: 0.5rem;
   border: 2px solid #343b45;
   background-color: #f5f5fc;
-  padding: 1rem 0;
-  transition: all 0.3s ease;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.6rem;
+  padding: 1rem;
+  transition: 0.3s;
 }
 
 .social-media a div:hover {
-  color: #ffffff;
   background-color: #343b45;
-}
-
-.email-wrapper {
-  width: 100%;
-}
-
-.email-button {
-  width: 100%;
-  margin: 1rem 0;
-  border-radius: 0.5rem;
-  border: 2px solid #343b45;
-  background-color: #f5f5fc;
-  padding: 1rem 0;
-  transition: all 0.3s ease;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.6rem;
-  color: #343b45;
-  cursor: pointer;
-}
-
-.email-button:hover {
-  color: #ffffff;
-  background-color: #343b45;
-}
-
-.email-arrow {
-  transition: transform 0.25s ease;
-}
-
-.email-wrapper.open .email-arrow {
-  transform: rotate(-180deg);
-}
-
-.email-dropdown {
-  display: none;
-  width: 100%;
-  margin-top: -0.25rem;
-  margin-bottom: 1rem;
-  border-radius: 0.5rem;
-  border: 2px solid #343b45;
-  background-color: #f5f5fc;
-  padding: 1rem 0;
-  text-align: center;
-  color: #343b45;
-}
-
-.email-dropdown.show-email {
-  display: block;
-}
-
-@media only screen and (min-width: 1000px) {
-  .wrapper {
-    width: 55%;
-  }
+  color: white;
 }
