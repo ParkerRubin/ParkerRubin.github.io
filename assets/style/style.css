@@ -275,3 +275,7 @@ ul {
     width: 55%;
   }
 }
+
+.email-wrapper.open .email-arrow {
+  transform: rotate(-180deg);
+}
