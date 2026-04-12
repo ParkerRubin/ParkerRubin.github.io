@@ -213,11 +213,11 @@ ul {
   width: 100%;
 }
 
-.social-media a div,
-.email-button {
+.social-media a div {
   width: 100%;
   margin: 1rem 0;
   border-radius: 0.5rem;
+  backdrop-filter: blur(10px);
   border: 2px solid #343b45;
   background-color: #f5f5fc;
   padding: 1rem 0;
@@ -226,11 +226,9 @@ ul {
   align-items: center;
   justify-content: center;
   gap: 0.6rem;
-  color: #343b45;
 }
 
-.social-media a div:hover,
-.email-button:hover {
+.social-media a div:hover {
   color: #ffffff;
   background-color: #343b45;
 }
