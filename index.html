@@ -1,78 +1,63 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="theme-color" content="#f2f3fb" />
-    <title>Parker Rubin</title>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Parker Rubin</title>
 
-    <link
-      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
-      rel="stylesheet"
-    />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Roboto&display=swap"
-      rel="stylesheet"
-    />
-    <link href="assets/style/style.css" rel="stylesheet" />
-    <script src="https://unpkg.com/scrollreveal"></script>
-  </head>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet"/>
 
-  <body>
-    <div class="wrapper">
-      <div class="container">
+  <link href="assets/style/style.css" rel="stylesheet" />
+</head>
 
-        <!-- Profile Picture -->
-        <div class="picture">
-          <img
-            src="assets/profile-picture.webp"
-            alt="Parker Rubin's photo"
-          />
-        </div>
+<body>
 
-        <!-- Name -->
-        <div class="name" translate="no">
-          <span><span>Par</span></span><span><span>ker</span></span>
-          <span><span>Rub</span></span><span><span>in</span></span>
-        </div>
+<div class="container">
 
-        <!-- About -->
-        <div class="info-box">
-          About me
-          <div class="toggle" onclick="vibrate()">
-            <i class="fa-solid fa-chevron-down"></i>
-          </div>
+  <!-- Profile -->
+  <div class="picture">
+    <img src="assets/profile-picture.webp" alt="Parker Rubin">
+  </div>
 
-          <div>
-            <br />
-            <div class="details">
-              <ul>
-                <li class="about">
-                  Hey, I’m Parker Rubin. I’m a Computer Science student at FAU and a SOC Analyst intern with hands-on experience in cybersecurity, AI tools, and system-level work. I’ve handled thousands of alerts, worked with EDR tools, and enjoy building things that actually solve problems.
-                  <br /><br />
-                  I’m especially interested in DFIR, blue team operations, and building my own AI systems.
-                </li>
-              </ul>
-            </div>
-          </div>
-        </div>
+  <h1>Parker Rubin</h1>
+  <p>CS Student • Cybersecurity • AI</p>
 
-        <!-- Socials -->
-        <div class="social-media">
-          </div>
+  <!-- About -->
+  <div class="card">
+    <h2>About Me</h2>
+    <p>
+      Hey, I’m Parker. I’m a Computer Science student at FAU and a SOC Analyst intern.
+      I’ve worked thousands of alerts, used EDR tools, and enjoy building AI tools
+      and solving real-world technical problems.
+    </p>
+  </div>
 
-          <a href="https://github.com/ParkerRubin" target="_blank">
-            <div><i class="fa-brands fa-github"></i>GitHub</div>
-          </a>
+  <!-- Email Dropdown -->
+  <div class="card clickable" onclick="toggleEmail()">
+    <h2>Email ▼</h2>
+    <p id="emailBox" style="display:none;">pdrrubinn@gmail.com</p>
+  </div>
 
-          <a href="https://www.linkedin.com/in/parker-rubin-51b239324" target="_blank">
-            <div><i class="fa-brands fa-linkedin-in"></i>LinkedIn</div>
-          </a>
-        </div>
+  <!-- Socials -->
+  <div class="socials">
+    <a href="https://github.com/ParkerRubin" target="_blank">
+      <i class="fa-brands fa-github"></i> GitHub
+    </a>
 
-      </div>
-    </div>
+    <a href="https://www.linkedin.com/in/parker-rubin-51b239324" target="_blank">
+      <i class="fa-brands fa-linkedin"></i> LinkedIn
+    </a>
+  </div>
 
-    <script src="assets/js/script.js"></script>
-  </body>
+</div>
+
+<script>
+function toggleEmail() {
+  const box = document.getElementById("emailBox");
+  box.style.display = (box.style.display === "none") ? "block" : "none";
+}
+</script>
+
+</body>
 </html>
