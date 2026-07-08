@@ -20,7 +20,6 @@ a {
 ul {
   list-style-type: none;
 }
-
 /***wrapper maintain page content width***/
 .wrapper {
   padding: 1.5rem 0;
@@ -35,7 +34,6 @@ ul {
   justify-content: center;
   width: 100%;
 }
-
 /*****Picture and name*****/
 .picture {
   height: 9rem;
@@ -55,14 +53,12 @@ ul {
   font-weight: bold;
   color: #00445a;
 }
-
 /**On load name effect**/
 .name>span {
   display: inline-block;
   overflow: hidden;
   transition: .2s transform
 }
-
 .name>span span {
   display: inline-block;
   transition: .5s transform cubic-bezier(.34, 1.56, .64, 1);
@@ -79,12 +75,10 @@ ul {
 .name>span:nth-child(even) span {
   transform: translateY(100%);
 }
-
 .name.loaded>span,
 .name.loaded>span span {
   transform: translateY(0);
 }
-
 /*****Few personal details*****/
 .info-box {
   width: 100%;
@@ -95,6 +89,7 @@ ul {
   height: 3.45rem;
   overflow: hidden;
   position: relative;
+  margin-bottom: 1rem;
 }
 /*if toggle btn click then add .active*/
 .info-box .toggle {
@@ -121,7 +116,6 @@ ul {
   transition: 0.25s;
   transform: rotate(-180deg);
 }
-
 /***details***/
 .details {
   border-top: 1px solid rgba(0, 0, 0, 0.1);
@@ -145,35 +139,29 @@ ul {
 .details .about {
   line-height: 1.5rem;
 }
-
 /***Project section***/
 .projects {
   width: 100%;
 }
-
 .project {
   display: flex;
   align-items: center;
   padding: 0;
   text-decoration: none;
 }
-
 .project:not(:last-child) {
       border-bottom: 1px solid #e5e7eb;
 }
-
 .project i {
   font-size: 2rem;
   color: #26caff;
 }
-
 .project ul {
   overflow: hidden;
   list-style-type: none;
   line-height: 0.2rem;
   margin-left: 0.8rem;
 }
-
 .project ul li {
   overflow: hidden;
   display: inline-block;
@@ -181,16 +169,13 @@ ul {
   white-space: nowrap;
   color: #000;
 }
-
 .project ul small {
   color: #909090;
 }
-
 /*****All social media btn*****/
 .social-media {
   width: 100%;
 }
-
 .social-media div {
   width: 100%;
   margin: 1rem 0;
@@ -209,23 +194,9 @@ ul {
   color: #ffffff;
   background-color: #343b45;
 }
-
 /***responsive for desktop***/
 @media only screen and (min-width: 1000px) {
   .wrapper {
     width: 55%;
   }
-}
-
-/***certificates***/
-.info-box {
-  width: 100%;
-  background-color: #f5f5fc;
-  border-radius: 0.5rem;
-  border: 2px solid #343b45;
-  padding: 1rem 0;
-  height: 3.45rem;
-  overflow: hidden;
-  position: relative;
-  margin-bottom: 1rem;
 }
