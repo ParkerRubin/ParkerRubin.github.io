@@ -216,3 +216,16 @@ ul {
     width: 55%;
   }
 }
+
+/***certificates***/
+.info-box {
+  width: 100%;
+  background-color: #f5f5fc;
+  border-radius: 0.5rem;
+  border: 2px solid #343b45;
+  padding: 1rem 0;
+  height: 3.45rem;
+  overflow: hidden;
+  position: relative;
+  margin-bottom: 1rem;
+}
