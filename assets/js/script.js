@@ -24,3 +24,12 @@ ScrollReveal().reveal(socialMediaLinks, {
 
 // on load name effect 
 setTimeout(() => document.querySelector('.name').classList.add('loaded'), 500);
+
+/*more details button*/
+const containers = document.querySelectorAll(".info-box");
+containers.forEach((container) => {
+  const toggle = container.querySelector(".toggle");
+  toggle.addEventListener("click", () => {
+    container.classList.toggle("active");
+  });
+});
