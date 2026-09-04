@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#faf7f2" />
+    <meta name="description" content="Using Linux audit logs to attribute simulated attacks to the files they modified." />
+    <title>Let's wget This Bread, File Integrity Monitoring with Auditd</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+      rel="stylesheet"
+    />
+    <link href="../assets/style/style.css" rel="stylesheet" />
+  </head>
+  <body>
+    <main class="page">
+
+      <a class="back-link" href="../blog.html"><i class="fa-solid fa-arrow-left"></i> Back to blog</a>
+
+      <div class="post-tags">
+        <span class="tag tag-ir">Incident response</span>
+      </div>
+      <h1 class="name" style="font-size: 1.8rem; text-align: left; animation: none; opacity: 1; transform: none;">
+        Let's wget This Bread, File Integrity Monitoring with Auditd
+      </h1>
+      <p class="post-date">Linux auditd, ausearch, breach attribution</p>
+
+      <div class="post-body">
+        <p>
+          Incident response project focused on file attribution: configuring the Linux
+          Audit daemon (auditd) to monitor a set of protected files, running simulated
+          attack scripts against them, and using the resulting audit logs to determine
+          exactly which attack modified which file. This is the same attribution work
+          analysts perform after a real breach.
+        </p>
+
+        <h3>Objective</h3>
+        <ul>
+          <li>Configure Audit rules to monitor write access to a set of protected files</li>
+          <li>Run three unknown attack scripts that silently modify files in that protected set</li>
+          <li>Use Audit logs to identify which files were altered and attribute each change to the correct attack</li>
+          <li>Understand how file level audit trails support post-incident forensics and breach attribution</li>
+        </ul>
+
+        <img src="../posts/protected-files-listing.png" alt="Terminal listing of the 10 protected files being watched" style="width: 100%; border-radius: 10px; margin: 1rem 0 1.5rem;" />
+        <p>The 10 files sitting in <code>protected_files</code> before any rules were applied, four of these ended up being the ones the attacks actually touched.</p>
+
+        <h3>Findings</h3>
+        <p>Files modified by the attack scripts: <code>Cloudia.txt</code>, <code>oakley.txt</code>, <code>squeaky.txt</code>, <code>precipitation.csv</code></p>
+
+        <table>
+          <thead>
+            <tr><th>File</th><th>Attack</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Cloudia.txt</td><td>attack-a</td></tr>
+            <tr><td>oakley.txt</td><td>attack-b</td></tr>
+            <tr><td>squeaky.txt</td><td>attack-b</td></tr>
+            <tr><td>precipitation.csv</td><td>attack-c</td></tr>
+          </tbody>
+        </table>
+
+        <h3>Methodology</h3>
+        <ol>
+          <li>Downloaded the starter project via <code>wget</code> and unzipped it in the home directory to keep filepaths consistent</li>
+          <li>Made the three attack scripts executable with <code>chmod u+x attack-a attack-b attack-c</code></li>
+          <li>Set up write-watch Audit rules (<code>auditctl -w</code>) on each of the 10 files in <code>/protected_files</code>, giving each rule a unique filter key so its triggering events could be isolated later</li>
+        </ol>
+
+        <img src="../posts/audit-rules-final.png" alt="Finished audit.rules file with a separate write-watch rule and unique filter key per protected file" style="width: 100%; border-radius: 10px; margin: 1rem 0 1.5rem;" />
+        <p>The finished rule set, one <code>-w</code> line per file, each with its own filter key rather than one shared key across all ten.</p>
+
+        <ol start="4">
+          <li>Restarted the Audit daemon (<code>sudo systemctl restart auditd</code>) so the new rules took effect</li>
+          <li>Ran <code>./attack-a</code>, <code>./attack-b</code>, and <code>./attack-c</code> to trigger the, at the time unknown, file modifications</li>
+          <li>Filtered the Audit event logs (<code>ausearch</code>) by each rule's filter key to determine exactly which file each attack touched, and cross-referenced the process and executable name in each log entry back to the responsible attack script</li>
+        </ol>
+
+        <img src="../posts/ausearch-filter.png" alt="Terminal output of ausearch filtered by the protected_files rules, showing which files were touched" style="width: 100%; border-radius: 10px; margin: 1rem 0 1.5rem;" />
+        <p>Filtering <code>ausearch</code> output down to just the protected files confirmed exactly which four were touched and when.</p>
+
+        <h3>Tools used</h3>
+        <ul>
+          <li><code>auditd</code> and <code>auditctl</code>, configuring write-watch rules on protected files</li>
+          <li><code>ausearch</code>, filtering audit event logs by rule or filter key to attribute changes</li>
+          <li>Vim, editing audit rule files on the VM</li>
+        </ul>
+
+        <h3>Key takeaway</h3>
+        <p>
+          File integrity monitoring is how defenders prove what an attacker actually
+          touched after a breach. Without an audit trail like this, you can confirm a
+          system was compromised but not reconstruct what changed or who or what
+          triggered it. The filter-key tagging approach used here mirrors how production
+          security teams categorize audit rules by threat type, such as privilege
+          escalation or data exfiltration, so findings can be triaged quickly. This kind
+          of file level audit trail is also a hard requirement, not optional, under
+          compliance frameworks like PCI-DSS and HIPAA.
+        </p>
+
+        <p>
+          <a href="https://github.com/ParkerRubin/CNT-4403-042-Foundations-of-Cybersecurity-Projects/tree/main/audit-file-integrity-monitoring" target="_blank">View the repo on GitHub</a>
+        </p>
+      </div>
+
+    </main>
+    <script src="../assets/js/script.js"></script>
+  </body>
+</html>
