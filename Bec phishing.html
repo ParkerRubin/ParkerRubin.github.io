@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#faf7f2" />
+    <meta name="description" content="Tracing a BEC phishing campaign through raw SMTP traffic in Wireshark." />
+    <title>Catch Me If You Can, BEC Phishing Investigation</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+      rel="stylesheet"
+    />
+    <link href="../assets/style/style.css" rel="stylesheet" />
+  </head>
+  <body>
+    <main class="page">
+
+      <a class="back-link" href="../blog.html"><i class="fa-solid fa-arrow-left"></i> Back to blog</a>
+
+      <div class="post-tags">
+        <span class="tag tag-network">Network forensics</span>
+      </div>
+      <h1 class="name" style="font-size: 1.8rem; text-align: left; animation: none; opacity: 1; transform: none;">
+        Catch Me If You Can, BEC Phishing Investigation
+      </h1>
+      <p class="post-date">Wireshark, SMTP, packet capture analysis</p>
+
+      <div class="post-body">
+        <p>
+          Network forensics project simulating a Business Email Compromise (BEC) scenario:
+          a malicious actor sent phishing emails attempting to trick employees into
+          fraudulent payments. The goal was to inspect <code>.pcap</code> captures in
+          Wireshark, isolate the malicious traffic from legitimate mail, and trace the
+          phishing campaign back to its source.
+        </p>
+
+        <h3>Objective</h3>
+        <ul>
+          <li>Inspect <code>.pcap</code> files and extract raw email content from SMTP traffic</li>
+          <li>Distinguish legitimate emails from fraudulent ones across multiple captures</li>
+          <li>Identify the malicious actor's source IP</li>
+          <li>Understand why SMTP header metadata, not just email body content, is the actual forensic anchor for tracing a phishing campaign's origin</li>
+        </ul>
+
+        <h3>Findings</h3>
+        <p>Malicious actor's IP address: <code>10.6.1.104</code></p>
+        <p>Phishing subject lines identified, all from <code>C.pcap</code>:</p>
+        <ol>
+          <li>"Read carefully! - dayrit"</li>
+          <li>"Pay! - 12345"</li>
+          <li>"Don't wait too long! - fatima"</li>
+        </ol>
+
+        <h3>Methodology</h3>
+        <ol>
+          <li>Applied the <code>smtp</code> display filter across all four provided <code>.pcap</code> files to surface mail traffic</li>
+          <li>Triaged each capture for suspicious language, payment demands, extortion phrasing, and ransomware indicators, and identified <code>C.pcap</code> as the capture containing malicious content</li>
+          <li>Used Follow → TCP Stream on flagged packets to read full email exchanges in sequence</li>
+          <li>Traced the origin of the malicious mail to <code>10.6.1.104</code> sending to the mail server</li>
+          <li>Narrowed the view with <code>ip.addr == 10.6.1.104</code> to isolate every packet tied to that host</li>
+          <li>Confirmed the pattern repeated across multiple emails from the same IP, all following a RAT (Remote Administration Tool) extortion script demanding payment</li>
+        </ol>
+
+        <div class="callout">
+          <code>10.6.1.104</code> is a private (RFC 1918) address. Seeing a private IP as the
+          apparent source of external phishing traffic is a notable detail, it suggests
+          either an internal host was compromised and used to relay the phishing emails,
+          or the capture reflects internal network traffic or IP spoofing rather than a
+          direct external actor.
+        </div>
+
+        <h3>Stretch goal, extracted phishing emails</h3>
+        <p>
+          Used File → Export Objects → IMF in Wireshark to pull every email object out of
+          <code>C.pcap</code>, then exported and opened three as <code>.eml</code> files in
+          a mail client to inspect their full content. The extracted objects showed a
+          recurring extortion style subject line pattern across dozens of messages, with
+          one email opening on a claimed password and RAT compromise, a common BEC and
+          sextortion scare tactic. A second variant included a specific Bitcoin payment
+          demand and instructions for purchasing BTC, and a third variant sent to a
+          different recipient used the same template, confirming this was a mass, scripted
+          campaign rather than a targeted one off.
+        </p>
+
+        <h3>Tools used</h3>
+        <ul>
+          <li>Wireshark, packet capture inspection, SMTP filtering, TCP Stream follow, IMF object export</li>
+          <li>Display filters: <code>smtp</code>, <code>ip.addr == 10.6.1.104</code></li>
+        </ul>
+
+        <h3>Key takeaway</h3>
+        <p>
+          BEC phishing works because the emails are designed to look legitimate, the real
+          signal isn't in the email body, it's in the metadata: sending IP, SMTP headers,
+          and routing path. Packet level inspection exposes exactly what an email client
+          normally hides from the end user, which is why raw SMTP traffic analysis is a
+          foundational skill for tracing phishing infrastructure back to its source.
+        </p>
+      </div>
+
+    </main>
+    <script src="../assets/js/script.js"></script>
+  </body>
+</html>
