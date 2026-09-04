@@ -1,158 +1,179 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
   <head>
-
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="theme-color" content="
-#f2f3fb" />
+    <meta name="theme-color" content="#f6f6fb" />
+    <meta name="description" content="Parker Rubin, Computer Science student focused on cybersecurity and blue team operations." />
     <title>Parker Rubin</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
     <link
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
       rel="stylesheet"
     />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Roboto&display=swap"
-      rel="stylesheet"
-    />
     <link href="assets/style/style.css" rel="stylesheet" />
-    <script src="https://unpkg.com/scrollreveal"></script>
   </head>
   <body>
-    <div class="wrapper">
-      <div class="container">
-        <!-- Picture -->
-        <div class="picture">
-          <img
-            src="assets/profile-picture.webp"
-            alt="Parker Rubin's photo"
-          />
+    <main class="page">
+
+      <!-- Hero -->
+      <section class="hero">
+        <div class="portrait">
+          <img src="assets/profile-picture.webp" alt="Parker Rubin" />
         </div>
-        <!-- Name -->
-        <div class="name" translate="no">
-          <span><span>Par</span></span><span><span>ker</span></span>
-          <span><span>Rub</span></span><span><span>in</span></span>
-        </div>
-        <!-- About -->
-        <div class="info-box">
-          About me
-          <div class="toggle" onclick="vibrate()">
+        <h1 class="name" id="name">Parker Rubin</h1>
+        <span class="accent-line" aria-hidden="true"></span>
+        <p class="role">Computer science student focused on cybersecurity and blue team operations</p>
+        <p class="location"><i class="fa-solid fa-location-dot"></i> Boca Raton, Florida</p>
+      </section>
+
+      <!-- About -->
+      <section class="block" id="about">
+        <h2>About</h2>
+        <p>
+          I'm a Computer Science student at FAU with experience as a SOC Analyst intern,
+          working across cybersecurity, AI tools, and system level work. I've handled
+          thousands of alerts, worked with EDR tools, and enjoy building things that
+          actually solve problems.
+        </p>
+        <p>
+          I'm especially interested in DFIR, blue team operations, and building AI systems.
+        </p>
+      </section>
+
+      <!-- Projects -->
+      <section class="block" id="projects">
+        <h2>Projects</h2>
+        <!-- Placeholder rows, swap in your real projects and links -->
+        <a class="project-row" href="#" target="_blank">
+          <div class="project-text">
+            <h3>Project name</h3>
+            <p>One line description of what it does and the stack you used</p>
+          </div>
+          <i class="fa-solid fa-arrow-up-right"></i>
+        </a>
+        <a class="project-row" href="#" target="_blank">
+          <div class="project-text">
+            <h3>Project name</h3>
+            <p>One line description of what it does and the stack you used</p>
+          </div>
+          <i class="fa-solid fa-arrow-up-right"></i>
+        </a>
+      </section>
+
+      <!-- Certifications -->
+      <section class="block" id="certifications">
+        <h2>Certifications</h2>
+
+        <div class="accordion">
+          <button class="accordion-header" aria-expanded="false">
+            <span>SentinelOne IR Engineer (SIREN)</span>
             <i class="fa-solid fa-chevron-down"></i>
-          </div>
-          <div>
-            <br />
-            <div class="details">
-              <ul>
-                <li class="about">
-                  Hey, I’m Parker Rubin. I’m a Computer Science student at FAU with expierence as a SOC Analyst intern with experience in cybersecurity, AI tools, and system-level work. I’ve handled thousands of alerts, worked with EDR tools, and enjoy building things that actually solve problems.
-                  <br /><br />
-                  I’m especially interested in DFIR, blue team operations, and building AI systems.
-                </li>
-              </ul>
-            </div>
-          </div>
-        </div>
-<!-- Certifications -->
-        <div class="info-box">
-          Certifications
-          <div class="toggle" onclick="vibrate()">
-            <i class="fa-solid fa-chevron-down"></i>
-          </div>
-          <div>
-            <br />
-            <div class="details">
-              <ul>
-                <li class="about">
-                  <strong>SentinelOne IR Engineer (SIREN)</strong> — SentinelOne
-                  <br /><br />
-                  Employer-sponsored capstone certification for incident response partners. Covered Deep Visibility (S1QL) threat hunting, Storyline-based investigation, Singularity blocklist and exclusion administration, incident handling workflows, and false-positive tuning across the SentinelOne EDR platform.
-                  <br /><br />
-                  <em>Module badges earned:</em>
-                  <ul style="list-style-type: disc; margin-left: 1.2rem; margin-top: 0.4rem;">
-                    <li>Threat Hunting I: Hunting in Ops Center (Feb 2026)</li>
-                    <li>Troubleshooting Windows Agent Interoperability Issues (Mar 2026)</li>
-                    <li>Troubleshooting Endpoint Performance Issues (Mar 2026)</li>
-                    <li>Singularity Administration: Managing Blocklists and Exclusions (Mar 2026)</li>
-                    <li>Incident Response: Incident Handling with the Singularity Platform (Mar 2026)</li>
-                    <li>Incident Response: Tuning to Reduce False Positives with SentinelOne (Mar 2026)</li>
-                  </ul>
-                </li>
-                <li class="about">
-                  <strong>IBM SkillsBuild Cybersecurity Certificate</strong> — IBM SkillsBuild (In Progress)
-                  <br /><br />
-                  Six-badge cybersecurity certificate track covering governance and risk, vulnerability management, system and network security, cloud security, security operations, and incident response and forensics.
-                  <br /><br />
-                  <em>Module badges earned:</em>
-                  <ul style="list-style-type: disc; margin-left: 1.2rem; margin-top: 0.4rem;">
-                    <li>Governance, Risk, Compliance, and Data Privacy (Jul 2026) — technical knowledge and practical skills to evaluate data security and privacy concepts, assess organizational risk, develop a data backup plan, and apply file- and drive-level encryption across various contexts</li>
-                    <li>Vulnerability Management (Jul 2026) — advanced competencies to apply appropriate controls to a vulnerability, justify threat mitigation tactics, categorize vulnerabilities by severity, evaluate the current state of organizational security, and analyze the impact of cybersecurity threats on systems and processes</li>
-                    <li>System and Network Security (Jul - 2026) - technical knowledge and practical skills to secure a host operating system, classify application, service, and wireless attacks, identify advantages of network security devices, design a secure network, and differentiate between network access controls</li>
-                    <!-- Add remaining badges as earned, e.g.:
-                    <li>System and Network Security (Month Year)</li>
-                    <li>Cloud Security (Month Year)</li>
-                    <li>Security Operations and Management (Month Year)</li>
-                    <li>Incident Response and System Forensics (Month Year)</li>
-                    -->
-                  </ul>
-                </li>
-                <li class="about">
-                  <strong>Foundations of Cybersecurity</strong> — Google
-                  <br /><br />
-                  First course in the Google Cybersecurity Certificate. Introduces the cybersecurity profession, including entry-level analyst responsibilities and core skills, the events that shaped the field, and the CIA triad (confidentiality, integrity, availability). Covers the CISSP eight security domains, common security frameworks and controls, security ethics, and the tools cybersecurity analysts use day to day.
-                </li>
-                <li class="about">
-                  <strong>Microsoft Security Essentials Professional Certificate</strong> — Microsoft &amp; LinkedIn (In Progress)
-                  <br /><br />
-                  Covers the CIA Triad and core information security principles, cybersecurity threats (malware, phishing, social engineering, identity theft), governance/risk/compliance (GRC), the cloud shared responsibility model, defense in depth, zero trust, identity and access management (IAM), Azure security services (Azure Firewall, Web Application Firewall), Microsoft Security Copilot for incident analysis and automated response, and Microsoft's endpoint, data governance, and threat intelligence solutions.
-                </li>
-              </ul>
-            </div>
+          </button>
+          <div class="accordion-panel">
+            <p>
+              Employer sponsored capstone certification for incident response partners.
+              Covered Deep Visibility (S1QL) threat hunting, Storyline based investigation,
+              Singularity blocklist and exclusion administration, incident handling
+              workflows, and false positive tuning across the SentinelOne EDR platform.
+            </p>
+            <ul class="badge-list">
+              <li>Threat Hunting I: Hunting in Ops Center, Feb 2026</li>
+              <li>Troubleshooting Windows Agent Interoperability Issues, Mar 2026</li>
+              <li>Troubleshooting Endpoint Performance Issues, Mar 2026</li>
+              <li>Singularity Administration: Managing Blocklists and Exclusions, Mar 2026</li>
+              <li>Incident Response: Incident Handling with the Singularity Platform, Mar 2026</li>
+              <li>Incident Response: Tuning to Reduce False Positives with SentinelOne, Mar 2026</li>
+            </ul>
           </div>
         </div>
 
-        <!-- Additional Certifications & Simulations -->
-        <div class="info-box">
-          Additional Certifications &amp; Simulations
-          <div class="toggle" onclick="vibrate()">
+        <div class="accordion">
+          <button class="accordion-header" aria-expanded="false">
+            <span>IBM SkillsBuild Cybersecurity Certificate</span>
             <i class="fa-solid fa-chevron-down"></i>
-          </div>
-          <div>
-            <br />
-            <div class="details">
-              <ul>
-                <li class="about">
-                  <strong>Intro to Web Development</strong> — CodePath (May 2026)
-                </li>
-                <li class="about">
-                  <strong>AIG – Shields Up: Cybersecurity Job Simulation</strong> — Forage (Dec 2025)
-                </li>
-                <li class="about">
-                  <strong>Deloitte Australia – Cyber Job Simulation</strong> — Forage (Dec 2025)
-                </li>
-                <li class="about">
-                  <strong>Mastercard – Cybersecurity Job Simulation</strong> — Forage (Nov 2025)
-                </li>
-              </ul>
-            </div>
+          </button>
+          <div class="accordion-panel">
+            <p>
+              Six badge cybersecurity certificate track covering governance and risk,
+              vulnerability management, system and network security, cloud security,
+              security operations, and incident response and forensics. In progress.
+            </p>
+            <ul class="badge-list">
+              <li>Governance, Risk, Compliance, and Data Privacy, Jul 2026</li>
+              <li>Vulnerability Management, Jul 2026</li>
+              <li>System and Network Security, Jul 2026</li>
+              <!-- Add remaining badges as earned:
+              <li>Cloud Security, Month Year</li>
+              <li>Security Operations and Management, Month Year</li>
+              <li>Incident Response and System Forensics, Month Year</li>
+              -->
+            </ul>
           </div>
         </div>
-        <!-- Socials -->
-        <div class="social-media">
-          <a href="mailto:pdrrubinn@gmail.com">
-            <div><i class="fa-solid fa-envelope"></i>Email: Pdrrubinn@gmail.com</div>
-          </a>
-          <a href="assets/style/Parker_Rubin_Resume_Sept.pdf?v=3" target="_blank">
-            <div><i class="fa-solid fa-file-lines"></i>Resume</div>
-          </a>
-          <a href="https://github.com/ParkerRubin" target="_blank">
-            <div><i class="fa-brands fa-github"></i>GitHub</div>
-          </a>
-          <a href="https://www.linkedin.com/in/parkerrubin" target="_blank">
-            <div><i class="fa-brands fa-linkedin-in"></i>LinkedIn</div>
-          </a>
+
+        <div class="accordion">
+          <button class="accordion-header" aria-expanded="false">
+            <span>Foundations of Cybersecurity, Google</span>
+            <i class="fa-solid fa-chevron-down"></i>
+          </button>
+          <div class="accordion-panel">
+            <p>
+              First course in the Google Cybersecurity Certificate. Introduces the
+              cybersecurity profession, including entry level analyst responsibilities
+              and core skills, the events that shaped the field, and the CIA triad.
+              Covers the CISSP eight security domains, common security frameworks and
+              controls, security ethics, and the tools cybersecurity analysts use day to day.
+            </p>
+          </div>
         </div>
-      </div>
-    </div>
+
+        <div class="accordion">
+          <button class="accordion-header" aria-expanded="false">
+            <span>Microsoft Security Essentials Professional Certificate</span>
+            <i class="fa-solid fa-chevron-down"></i>
+          </button>
+          <div class="accordion-panel">
+            <p>
+              Microsoft and LinkedIn, in progress. Covers the CIA triad and core
+              information security principles, cybersecurity threats including malware,
+              phishing, social engineering, and identity theft, governance risk and
+              compliance, the cloud shared responsibility model, defense in depth, zero
+              trust, identity and access management, Azure security services, Microsoft
+              Security Copilot for incident analysis, and Microsoft's endpoint, data
+              governance, and threat intelligence solutions.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Additional Certifications & Simulations -->
+      <section class="block" id="additional">
+        <h2>Additional certifications and simulations</h2>
+        <ul class="simple-list">
+          <li><strong>Intro to Web Development</strong> — CodePath, May 2026</li>
+          <li><strong>AIG, Shields Up: Cybersecurity Job Simulation</strong> — Forage, Dec 2025</li>
+          <li><strong>Deloitte Australia, Cyber Job Simulation</strong> — Forage, Dec 2025</li>
+          <li><strong>Mastercard, Cybersecurity Job Simulation</strong> — Forage, Nov 2025</li>
+        </ul>
+      </section>
+
+      <!-- Contact -->
+      <section class="block" id="contact">
+        <h2>Contact</h2>
+        <div class="contact-row">
+          <a href="mailto:pdrrubinn@gmail.com"><i class="fa-solid fa-envelope"></i> Email</a>
+          <a href="assets/style/Parker_Rubin_Resume_Sept.pdf?v=3" target="_blank"><i class="fa-solid fa-file-lines"></i> Resume</a>
+          <a href="https://github.com/ParkerRubin" target="_blank"><i class="fa-brands fa-github"></i> GitHub</a>
+          <a href="https://www.linkedin.com/in/parkerrubin" target="_blank"><i class="fa-brands fa-linkedin-in"></i> LinkedIn</a>
+        </div>
+      </section>
+
+    </main>
     <script src="assets/js/script.js"></script>
   </body>
 </html>
