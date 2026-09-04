@@ -45,6 +45,13 @@
           into that format, and this year I competed with FAU's team through the
           Cybersecurity Club.
         </p>
+        <p>
+          Scoring splits evenly between critical service uptime and inject completion, and
+          any points a team loses to red team compromises can be partially clawed back,
+          up to half, through a properly written incident response report. That last rule
+          is what made incident response worth taking seriously as its own skill rather
+          than an afterthought to the technical defense work.
+        </p>
 
         <h3>My role</h3>
         <p>
@@ -82,15 +89,36 @@
 
         <h3>What an inject actually looks like</h3>
         <p>
-          Below is an unfilled inject template, the kind of document that lands in your
-          inbox mid-competition with a business scenario attached and a countdown clock.
-          The actual answers we submitted aren't shared here, but the format gives a sense
-          of what the writing side of CCDC really is, less hacking, more technical writing
-          under pressure.
+          Below is the actual scenario text from one of our incident response injects, the
+          kind of document that lands mid-competition with a business scenario, a points
+          value, and a countdown clock attached. It also spells out exactly what a report
+          needs to include: affected hosts, a clear time frame, observed activity, the
+          persistence or access method, technical analysis, remediation steps, and an
+          evidence appendix. Our actual submitted answers aren't shown here, just the
+          prompt itself.
         </p>
+        <img src="../competitions/inject-scenario.png" alt="Incident Response inject scenario describing the report requirements and deadline" style="width: 100%; border-radius: 10px; margin: 1rem 0 1.5rem;" />
 
-        <!-- Drop in your blank inject template image(s) here, e.g.: -->
-        <!-- <img src="../assets/blog/inject-template.png" alt="Blank CCDC inject template" style="width: 100%; border-radius: 10px; margin: 1rem 0;" /> -->
+        <h3>Finding an unauthorized account</h3>
+        <p>
+          One of the simplest but highest value incident response tasks was auditing user
+          accounts against the competition's official list of authorized users, anyone
+          present on a host who wasn't on that list was either a legitimate default system
+          account or something the red team had planted.
+        </p>
+        <img src="../competitions/windows-user-list.png" alt="Windows local user account list with an unauthorized EvilAdmin account visible" style="width: 100%; max-width: 500px; border-radius: 10px; margin: 1rem 0 1.5rem;" />
+        <p>
+          On this Windows host, <code>EvilAdmin</code> stood out immediately, not a name
+          any legitimate business would provision, and not on the authorized list.
+        </p>
+        <img src="../competitions/linux-passwd.png" alt="Linux /etc/passwd file showing a redteam account with an interactive bash shell" style="width: 100%; border-radius: 10px; margin: 1rem 0 1.5rem;" />
+        <p>
+          Same idea on the Linux side, checking <code>/etc/passwd</code> turned up a
+          <code>redteam</code> account with a full interactive shell, not a service account
+          that should ever need one. Once flagged as unauthorized, removing the account
+          was the remediation step, then that removal and the evidence behind it became
+          the basis for the incident response report on that host.
+        </p>
 
         <h3>Key takeaway</h3>
         <p>
