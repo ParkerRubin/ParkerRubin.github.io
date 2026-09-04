@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#faf7f2" />
+    <meta name="description" content="Writing injects and running incident response for FAU's SE CCDC Qualifiers team." />
+    <title>Whack-a-Mole, SE CCDC Qualifiers</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+      rel="stylesheet"
+    />
+    <link href="../assets/style/style.css" rel="stylesheet" />
+    <link rel="icon" type="image/svg+xml" href="../assets/favicon.svg" />
+    <link rel="icon" type="image/png" sizes="32x32" href="../assets/favicon-32.png" />
+    <link rel="apple-touch-icon" href="../assets/apple-touch-icon.png" />
+  </head>
+  <body>
+    <main class="page">
+
+      <a class="back-link" href="../blog.html"><i class="fa-solid fa-arrow-left"></i> Back to blog</a>
+
+      <div class="post-tags">
+        <span class="tag tag-forensics">Competition</span>
+        <span class="tag tag-ir">Incident response</span>
+      </div>
+      <h1 class="name" style="font-size: 1.8rem; text-align: left; animation: none; opacity: 1; transform: none;">
+        Whack-a-Mole, SE CCDC Qualifiers
+      </h1>
+      <p class="post-date">Southeast CCDC Qualifiers, Florida Atlantic University</p>
+
+      <div class="post-body">
+        <img src="../assets/blog/ccdc-team.png" alt="FAU Cybersecurity Club team competing at SE CCDC Qualifiers" style="width: 100%; border-radius: 10px; margin-bottom: 1.5rem;" />
+
+        <p>
+          The Collegiate Cyber Defense Competition puts a student blue team in charge of a
+          live network, keeping services up, keeping a red team out, and handling whatever
+          gets thrown at them along the way, all while a scoring engine and a set of judges
+          are watching every move. Southeast CCDC Qualifiers is the regional entry point
+          into that format, and this year I competed with FAU's team through the
+          Cybersecurity Club.
+        </p>
+
+        <h3>My role</h3>
+        <p>
+          I worked injects and incident response. Injects are surprise business style
+          requests that show up mid-competition, a new compliance requirement, an executive
+          asking for a report, a vendor asking for access, and the blue team has to respond
+          in writing, on the clock, without dropping the network defense work already in
+          progress. Incident response was the other half, when the red team actually landed
+          something, my job was figuring out what happened, containing it, and documenting
+          it clearly enough that it would hold up to a judge reading it afterward.
+        </p>
+
+        <h3>Results</h3>
+        <img src="../assets/blog/ccdc-scoreboard.png" alt="SE CCDC scoreboard showing FAU's rank in each scored category" style="width: 100%; max-width: 420px; border-radius: 10px; margin-bottom: 1.5rem;" />
+        <table>
+          <thead>
+            <tr><th>Category</th><th>Rank</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Overall</td><td>15 / 45</td></tr>
+            <tr><td>Inject</td><td>15th, 69th percentile</td></tr>
+            <tr><td>Critical service uptime</td><td>29th, 37th percentile</td></tr>
+            <tr><td>Red team defense</td><td>43rd, 12th percentile</td></tr>
+            <tr><td>Incident response</td><td>7th, 87th percentile</td></tr>
+          </tbody>
+        </table>
+
+        <div class="callout">
+          Incident response was our strongest category by a wide margin, 7th out of 45
+          teams. Red team defense was our weakest. That gap tells its own story, we were
+          better at explaining and documenting what went wrong than we were at stopping it
+          from going wrong in the first place, which is a fair reflection of where the team
+          put its preparation time.
+        </div>
+
+        <h3>What an inject actually looks like</h3>
+        <p>
+          Below is an unfilled inject template, the kind of document that lands in your
+          inbox mid-competition with a business scenario attached and a countdown clock.
+          The actual answers we submitted aren't shared here, but the format gives a sense
+          of what the writing side of CCDC really is, less hacking, more technical writing
+          under pressure.
+        </p>
+
+        <!-- Drop in your blank inject template image(s) here, e.g.: -->
+        <!-- <img src="../assets/blog/inject-template.png" alt="Blank CCDC inject template" style="width: 100%; border-radius: 10px; margin: 1rem 0;" /> -->
+
+        <h3>Key takeaway</h3>
+        <p>
+          CCDC makes it obvious that defense isn't just technical, it's also
+          communication. A network could be perfectly contained and still lose points if
+          the incident report describing it is vague or late. Ranking 7th in incident
+          response while ranking near the bottom in red team defense showed me that the
+          two skills don't automatically come together, and that writing clearly under
+          time pressure is its own skill worth training separately from the technical work.
+        </p>
+      </div>
+
+    </main>
+    <script src="../assets/js/script.js"></script>
+  </body>
+</html>
