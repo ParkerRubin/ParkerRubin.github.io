@@ -47,6 +47,25 @@ ul {
   padding: 4rem 1.5rem 6rem;
 }
 
+@media (min-width: 860px) {
+  html {
+    font-size: 18px;
+  }
+
+  .page {
+    max-width: 760px;
+    padding: 6rem 2rem 8rem;
+  }
+
+  .hero {
+    margin-bottom: 5.5rem;
+  }
+
+  .block {
+    margin-bottom: 4.2rem;
+  }
+}
+
 /* Hero */
 .hero {
   text-align: center;
@@ -73,7 +92,7 @@ ul {
 .name {
   font-family: var(--font-display);
   font-weight: 600;
-  font-size: 2.1rem;
+  font-size: clamp(2.1rem, 4vw, 2.75rem);
   letter-spacing: -0.01em;
   opacity: 0;
   transform: translateY(10px);
