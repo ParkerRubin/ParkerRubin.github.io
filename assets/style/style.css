@@ -1,158 +1,202 @@
-<!DOCTYPE html>
-<html>
-  <head>
-
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="theme-color" content="
-#f2f3fb" />
-    <title>Parker Rubin</title>
-    <link
-      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
-      rel="stylesheet"
-    />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Roboto&display=swap"
-      rel="stylesheet"
-    />
-    <link href="assets/style/style.css" rel="stylesheet" />
-    <script src="https://unpkg.com/scrollreveal"></script>
-  </head>
-  <body>
-    <div class="wrapper">
-      <div class="container">
-        <!-- Picture -->
-        <div class="picture">
-          <img
-            src="assets/profile-picture.webp"
-            alt="Parker Rubin's photo"
-          />
-        </div>
-        <!-- Name -->
-        <div class="name" translate="no">
-          <span><span>Par</span></span><span><span>ker</span></span>
-          <span><span>Rub</span></span><span><span>in</span></span>
-        </div>
-        <!-- About -->
-        <div class="info-box">
-          About me
-          <div class="toggle" onclick="vibrate()">
-            <i class="fa-solid fa-chevron-down"></i>
-          </div>
-          <div>
-            <br />
-            <div class="details">
-              <ul>
-                <li class="about">
-                  Hey, I’m Parker Rubin. I’m a Computer Science student at FAU with expierence as a SOC Analyst intern with experience in cybersecurity, AI tools, and system-level work. I’ve handled thousands of alerts, worked with EDR tools, and enjoy building things that actually solve problems.
-                  <br /><br />
-                  I’m especially interested in DFIR, blue team operations, and building AI systems.
-                </li>
-              </ul>
-            </div>
-          </div>
-        </div>
-<!-- Certifications -->
-        <div class="info-box">
-          Certifications
-          <div class="toggle" onclick="vibrate()">
-            <i class="fa-solid fa-chevron-down"></i>
-          </div>
-          <div>
-            <br />
-            <div class="details">
-              <ul>
-                <li class="about">
-                  <strong>SentinelOne IR Engineer (SIREN)</strong> — SentinelOne
-                  <br /><br />
-                  Employer-sponsored capstone certification for incident response partners. Covered Deep Visibility (S1QL) threat hunting, Storyline-based investigation, Singularity blocklist and exclusion administration, incident handling workflows, and false-positive tuning across the SentinelOne EDR platform.
-                  <br /><br />
-                  <em>Module badges earned:</em>
-                  <ul style="list-style-type: disc; margin-left: 1.2rem; margin-top: 0.4rem;">
-                    <li>Threat Hunting I: Hunting in Ops Center (Feb 2026)</li>
-                    <li>Troubleshooting Windows Agent Interoperability Issues (Mar 2026)</li>
-                    <li>Troubleshooting Endpoint Performance Issues (Mar 2026)</li>
-                    <li>Singularity Administration: Managing Blocklists and Exclusions (Mar 2026)</li>
-                    <li>Incident Response: Incident Handling with the Singularity Platform (Mar 2026)</li>
-                    <li>Incident Response: Tuning to Reduce False Positives with SentinelOne (Mar 2026)</li>
-                  </ul>
-                </li>
-                <li class="about">
-                  <strong>IBM SkillsBuild Cybersecurity Certificate</strong> — IBM SkillsBuild (In Progress)
-                  <br /><br />
-                  Six-badge cybersecurity certificate track covering governance and risk, vulnerability management, system and network security, cloud security, security operations, and incident response and forensics.
-                  <br /><br />
-                  <em>Module badges earned:</em>
-                  <ul style="list-style-type: disc; margin-left: 1.2rem; margin-top: 0.4rem;">
-                    <li>Governance, Risk, Compliance, and Data Privacy (Jul 2026) — technical knowledge and practical skills to evaluate data security and privacy concepts, assess organizational risk, develop a data backup plan, and apply file- and drive-level encryption across various contexts</li>
-                    <li>Vulnerability Management (Jul 2026) — advanced competencies to apply appropriate controls to a vulnerability, justify threat mitigation tactics, categorize vulnerabilities by severity, evaluate the current state of organizational security, and analyze the impact of cybersecurity threats on systems and processes</li>
-                    <li>System and Network Security (Jul - 2026) - technical knowledge and practical skills to secure a host operating system, classify application, service, and wireless attacks, identify advantages of network security devices, design a secure network, and differentiate between network access controls</li>
-                    <!-- Add remaining badges as earned, e.g.:
-                    <li>System and Network Security (Month Year)</li>
-                    <li>Cloud Security (Month Year)</li>
-                    <li>Security Operations and Management (Month Year)</li>
-                    <li>Incident Response and System Forensics (Month Year)</li>
-                    -->
-                  </ul>
-                </li>
-                <li class="about">
-                  <strong>Foundations of Cybersecurity</strong> — Google
-                  <br /><br />
-                  First course in the Google Cybersecurity Certificate. Introduces the cybersecurity profession, including entry-level analyst responsibilities and core skills, the events that shaped the field, and the CIA triad (confidentiality, integrity, availability). Covers the CISSP eight security domains, common security frameworks and controls, security ethics, and the tools cybersecurity analysts use day to day.
-                </li>
-                <li class="about">
-                  <strong>Microsoft Security Essentials Professional Certificate</strong> — Microsoft &amp; LinkedIn (In Progress)
-                  <br /><br />
-                  Covers the CIA Triad and core information security principles, cybersecurity threats (malware, phishing, social engineering, identity theft), governance/risk/compliance (GRC), the cloud shared responsibility model, defense in depth, zero trust, identity and access management (IAM), Azure security services (Azure Firewall, Web Application Firewall), Microsoft Security Copilot for incident analysis and automated response, and Microsoft's endpoint, data governance, and threat intelligence solutions.
-                </li>
-              </ul>
-            </div>
-          </div>
-        </div>
-
-        <!-- Additional Certifications & Simulations -->
-        <div class="info-box">
-          Additional Certifications &amp; Simulations
-          <div class="toggle" onclick="vibrate()">
-            <i class="fa-solid fa-chevron-down"></i>
-          </div>
-          <div>
-            <br />
-            <div class="details">
-              <ul>
-                <li class="about">
-                  <strong>Intro to Web Development</strong> — CodePath (May 2026)
-                </li>
-                <li class="about">
-                  <strong>AIG – Shields Up: Cybersecurity Job Simulation</strong> — Forage (Dec 2025)
-                </li>
-                <li class="about">
-                  <strong>Deloitte Australia – Cyber Job Simulation</strong> — Forage (Dec 2025)
-                </li>
-                <li class="about">
-                  <strong>Mastercard – Cybersecurity Job Simulation</strong> — Forage (Nov 2025)
-                </li>
-              </ul>
-            </div>
-          </div>
-        </div>
-        <!-- Socials -->
-        <div class="social-media">
-          <a href="mailto:pdrrubinn@gmail.com">
-            <div><i class="fa-solid fa-envelope"></i>Email: Pdrrubinn@gmail.com</div>
-          </a>
-          <a href="assets/style/Parker_Rubin_Resume_Sept.pdf?v=3" target="_blank">
-            <div><i class="fa-solid fa-file-lines"></i>Resume</div>
-          </a>
-          <a href="https://github.com/ParkerRubin" target="_blank">
-            <div><i class="fa-brands fa-github"></i>GitHub</div>
-          </a>
-          <a href="https://www.linkedin.com/in/parkerrubin" target="_blank">
-            <div><i class="fa-brands fa-linkedin-in"></i>LinkedIn</div>
-          </a>
-        </div>
-      </div>
-    </div>
-    <script src="assets/js/script.js"></script>
-  </body>
-</html>
+* {
+  margin: 0;
+  padding: 0;
+  scroll-behavior: smooth;
+  box-sizing: border-box;
+}
+body {
+  background: #f2f3fb;
+  width: 100%;
+  min-height: 100vh;
+  font-family: "Roboto", sans-serif;
+}
+body::-webkit-scrollbar {
+  display: none;
+}
+a {
+  color: #343b45;
+  text-decoration: none;
+}
+ul {
+  list-style-type: none;
+}
+/***wrapper maintain page content width***/
+.wrapper {
+  padding: 1.5rem 0;
+  margin: auto;
+  width: 85%;
+}
+.container {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+}
+/*****Picture and name*****/
+.picture {
+  height: 9rem;
+  width: 9rem;
+  background-color: #52c8ff;
+  border-radius: 100%;
+  overflow: hidden;
+}
+.picture img {
+  height: 9rem;
+  width: 9rem;
+}
+.name {
+  padding: 1rem 0;
+  font-size: 2rem;
+  letter-spacing: 1.5px;
+  font-weight: bold;
+  color: #00445a;
+}
+/**On load name effect**/
+.name>span {
+  display: inline-block;
+  overflow: hidden;
+  transition: .2s transform
+}
+.name>span span {
+  display: inline-block;
+  transition: .5s transform cubic-bezier(.34, 1.56, .64, 1);
+}
+.name>span:nth-child(odd) {
+  transform: translateY(50%);
+}
+.name>span:nth-child(odd) span {
+  transform: translateY(-100%);
+}
+.name>span:nth-child(even) {
+  transform: translateY(-50%);
+}
+.name>span:nth-child(even) span {
+  transform: translateY(100%);
+}
+.name.loaded>span,
+.name.loaded>span span {
+  transform: translateY(0);
+}
+/*****Few personal details*****/
+.info-box {
+  width: 100%;
+  background-color: #f5f5fc;
+  border-radius: 0.5rem;
+  border: 2px solid #343b45;
+  padding: 1rem 0;
+  height: 3.45rem;
+  overflow: hidden;
+  position: relative;
+  margin-bottom: 1rem;
+}
+/*if toggle btn click then add .active*/
+.info-box .toggle {
+  padding: 0.94rem;
+  width: 100%;
+  height: 3.36rem;
+  cursor: pointer;
+  position: absolute;
+  font-size: 1.3rem;
+  top: 0;
+  right: 0;
+}
+.info-box.active {
+  height: auto;
+  padding-bottom: 0;
+  overflow: visible;
+}
+/***toggle button rotate on click***/
+.info-box .toggle i {
+  float: right;
+  transition: 0.25s;
+}
+.info-box.active .toggle > i {
+  transition: 0.25s;
+  transform: rotate(-180deg);
+}
+/***details***/
+.details {
+  border-top: 1px solid rgba(0, 0, 0, 0.1);
+  width: 95%;
+  margin: auto;
+}
+.details ul {
+  display: flex;
+  flex-direction: column;
+  padding: 0.5rem 0;
+  text-align: left;
+}
+.details ul li {
+  color: #4b4c4f;
+  padding: 0.5rem;
+}
+.details b {
+  color: #00445a;
+  letter-spacing: 1.3px;
+}
+.details .about {
+  line-height: 1.5rem;
+}
+/***Project section***/
+.projects {
+  width: 100%;
+}
+.project {
+  display: flex;
+  align-items: center;
+  padding: 0;
+  text-decoration: none;
+}
+.project:not(:last-child) {
+      border-bottom: 1px solid #e5e7eb;
+}
+.project i {
+  font-size: 2rem;
+  color: #26caff;
+}
+.project ul {
+  overflow: hidden;
+  list-style-type: none;
+  line-height: 0.2rem;
+  margin-left: 0.8rem;
+}
+.project ul li {
+  overflow: hidden;
+  display: inline-block;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: #000;
+}
+.project ul small {
+  color: #909090;
+}
+/*****All social media btn*****/
+.social-media {
+  width: 100%;
+}
+.social-media div {
+  width: 100%;
+  margin: 1rem 0;
+  border-radius: 0.5rem;
+  backdrop-filter: blur(10px);
+  border: 2px solid #343b45;
+  background-color: #f5f5fc;
+  padding: 1rem 0;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+}
+.social-media div:hover {
+  color: #ffffff;
+  background-color: #343b45;
+}
+/***responsive for desktop***/
+@media only screen and (min-width: 1000px) {
+  .wrapper {
+    width: 55%;
+  }
+}
