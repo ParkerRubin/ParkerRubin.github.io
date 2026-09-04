@@ -327,6 +327,32 @@ ul {
   color: var(--accent);
 }
 
+/* Lightbox */
+.lightbox-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(20, 22, 31, 0.9);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  z-index: 999;
+  cursor: zoom-out;
+  animation: fade-in 0.15s ease;
+}
+
+.lightbox-overlay img {
+  max-width: 100%;
+  max-height: 100%;
+  border-radius: 8px;
+  cursor: zoom-out;
+}
+
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
 /* Accordion */
 .accordion {
   border-bottom: 1px solid var(--line);
