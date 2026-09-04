@@ -1,10 +1,11 @@
 <!DOCTYPE html>
 <html>
   <head>
-    
+
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="theme-color" content="#f2f3fb" />
+    <meta name="theme-color" content="
+#f2f3fb" />
     <title>Parker Rubin</title>
     <link
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
@@ -43,39 +44,11 @@
             <div class="details">
               <ul>
                 <li class="about">
-                  Hey, I’m Parker Rubin. I’m a Computer Science student at FAU with experience as a SOC Analyst intern, working across cybersecurity, AI tools, and system-level work. I’ve handled thousands of alerts, worked with EDR tools, and enjoy building things that actually solve problems.
+                  Hey, I’m Parker Rubin. I’m a Computer Science student at FAU with expierence as a SOC Analyst intern with experience in cybersecurity, AI tools, and system-level work. I’ve handled thousands of alerts, worked with EDR tools, and enjoy building things that actually solve problems.
                   <br /><br />
                   I’m especially interested in DFIR, blue team operations, and building AI systems.
                 </li>
               </ul>
-            </div>
-          </div>
-        </div>
-        <!-- Projects -->
-        <div class="info-box">
-          Projects
-          <div class="toggle" onclick="vibrate()">
-            <i class="fa-solid fa-chevron-down"></i>
-          </div>
-          <div>
-            <br />
-            <div class="details">
-              <div class="projects">
-                <a href="https://github.com/ParkerRubin/SentryOS" class="project" target="_blank">
-                  <i class="fa-solid fa-shield-halved"></i>
-                  <ul>
-                    <li>SentryOS</li>
-                    <li><small>Python, Flask, AI-assisted triage via Anthropic API</small></li>
-                  </ul>
-                </a>
-                <a href="https://github.com/ParkerRubin/Fit-Forge" class="project" target="_blank">
-                  <i class="fa-solid fa-dumbbell"></i>
-                  <ul>
-                    <li>Fit-Forge</li>
-                    <li><small>Flask, SQLite, Jinja2 fitness web app</small></li>
-                  </ul>
-                </a>
-              </div>
             </div>
           </div>
         </div>
@@ -113,7 +86,7 @@
                   <ul style="list-style-type: disc; margin-left: 1.2rem; margin-top: 0.4rem;">
                     <li>Governance, Risk, Compliance, and Data Privacy (Jul 2026) — technical knowledge and practical skills to evaluate data security and privacy concepts, assess organizational risk, develop a data backup plan, and apply file- and drive-level encryption across various contexts</li>
                     <li>Vulnerability Management (Jul 2026) — advanced competencies to apply appropriate controls to a vulnerability, justify threat mitigation tactics, categorize vulnerabilities by severity, evaluate the current state of organizational security, and analyze the impact of cybersecurity threats on systems and processes</li>
-                    <li>System and Network Security (Jul 2026) - technical knowledge and practical skills to secure a host operating system, classify application, service, and wireless attacks, identify advantages of network security devices, design a secure network, and differentiate between network access controls</li>
+                    <li>System and Network Security (Jul - 2026) - technical knowledge and practical skills to secure a host operating system, classify application, service, and wireless attacks, identify advantages of network security devices, design a secure network, and differentiate between network access controls</li>
                     <!-- Add remaining badges as earned, e.g.:
                     <li>System and Network Security (Month Year)</li>
                     <li>Cloud Security (Month Year)</li>
@@ -136,7 +109,7 @@
             </div>
           </div>
         </div>
-        
+
         <!-- Additional Certifications & Simulations -->
         <div class="info-box">
           Additional Certifications &amp; Simulations
