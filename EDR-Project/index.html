@@ -1,0 +1,607 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SentryOS — building an EDR from the ground up</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg-void:#0A0E14;
+    --bg-surface:#121722;
+    --bg-raised:#171D2B;
+    --ink:#E7EAF0;
+    --ink-dim:#8891A3;
+    --ink-faint:#5B6478;
+    --line:#232B3D;
+    --accent:#8B7CF6;
+    --accent-dim:#4C4488;
+    --critical:#F0536D;
+    --high:#F5A34B;
+    --medium:#EFC94C;
+    --low:#5AA9E6;
+    --info:#7A8494;
+  }
+
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+
+  body{
+    margin:0;
+    background:var(--bg-void);
+    color:var(--ink);
+    font-family:"IBM Plex Sans", sans-serif;
+    font-size:17px;
+    line-height:1.65;
+    -webkit-font-smoothing:antialiased;
+  }
+
+  ::selection{ background:var(--accent-dim); color:#fff; }
+
+  a{ color:var(--accent); }
+  a:focus-visible, button:focus-visible, summary:focus-visible{
+    outline:2px solid var(--accent);
+    outline-offset:3px;
+  }
+
+  h1,h2,h3{
+    font-family:"Space Grotesk", sans-serif;
+    font-weight:600;
+    letter-spacing:-0.01em;
+    color:var(--ink);
+  }
+
+  code, .mono{ font-family:"IBM Plex Mono", monospace; }
+
+  .wrap{
+    max-width:720px;
+    margin:0 auto;
+    padding:0 24px;
+  }
+  .wrap-wide{
+    max-width:880px;
+    margin:0 auto;
+    padding:0 24px;
+  }
+
+  p{ color:var(--ink); }
+  .lede{ color:var(--ink-dim); }
+
+  /* ---------- Hero ---------- */
+  .hero{
+    padding:88px 0 64px;
+    border-bottom:1px solid var(--line);
+  }
+  .hero h1{
+    font-size:clamp(32px, 5vw, 46px);
+    line-height:1.15;
+    margin:0 0 20px;
+    max-width:14ch;
+  }
+  .hero p{
+    font-size:19px;
+    color:var(--ink-dim);
+    max-width:56ch;
+    margin:0 0 40px;
+  }
+  .meta-row{
+    display:flex;
+    gap:18px;
+    flex-wrap:wrap;
+    font-size:14px;
+    color:var(--ink-faint);
+    margin-bottom:48px;
+  }
+
+  /* ---------- Mock alert card (hero visual) ---------- */
+  .alert-card{
+    background:var(--bg-surface);
+    border:1px solid var(--line);
+    border-radius:10px;
+    padding:20px 22px;
+    max-width:600px;
+    box-shadow:0 24px 60px -20px rgba(0,0,0,.6);
+  }
+  .alert-card-top{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    margin-bottom:14px;
+  }
+  .sev-pill{
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+    font-size:12.5px;
+    font-weight:500;
+    padding:3px 10px;
+    border-radius:999px;
+    background:rgba(240,83,109,.14);
+    color:var(--critical);
+  }
+  .sev-pill::before{
+    content:"";
+    width:6px; height:6px;
+    border-radius:50%;
+    background:currentColor;
+  }
+  .technique-tag{
+    font-family:"IBM Plex Mono", monospace;
+    font-size:12.5px;
+    background:var(--bg-raised);
+    border:1px solid var(--line);
+    color:var(--accent);
+    padding:2px 8px;
+    border-radius:6px;
+  }
+  .alert-card h3{
+    font-size:17px;
+    margin:0 0 4px;
+    font-family:"IBM Plex Sans", sans-serif;
+    font-weight:600;
+  }
+  .alert-card .endpoint{
+    font-size:13.5px;
+    color:var(--ink-faint);
+    margin:0 0 16px;
+  }
+  .alert-card .ai-summary{
+    background:var(--bg-raised);
+    border-left:2px solid var(--accent);
+    padding:10px 14px;
+    font-size:14.5px;
+    color:var(--ink-dim);
+    border-radius:0 6px 6px 0;
+  }
+  .lineage{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    margin-top:16px;
+    font-family:"IBM Plex Mono", monospace;
+    font-size:12px;
+  }
+  .lineage span.proc{
+    background:var(--bg-raised);
+    border:1px solid var(--line);
+    padding:4px 9px;
+    border-radius:6px;
+    color:var(--ink-dim);
+  }
+  .lineage .arrow{ color:var(--ink-faint); }
+
+  /* ---------- Sections ---------- */
+  section{ padding:64px 0; }
+  section.on-surface{ background:var(--bg-surface); border-top:1px solid var(--line); border-bottom:1px solid var(--line); }
+
+  h2{
+    font-size:28px;
+    margin:0 0 8px;
+  }
+  .section-kicker{
+    font-size:14.5px;
+    color:var(--ink-faint);
+    margin:0 0 36px;
+  }
+
+  /* ---------- Architecture diagram ---------- */
+  .arch{
+    display:flex;
+    align-items:stretch;
+    gap:0;
+    flex-wrap:wrap;
+    margin:36px 0 8px;
+  }
+  .arch-box{
+    background:var(--bg-raised);
+    border:1px solid var(--line);
+    border-radius:10px;
+    padding:18px 20px;
+    flex:1 1 160px;
+    min-width:150px;
+  }
+  .arch-box .label{
+    font-family:"Space Grotesk", sans-serif;
+    font-weight:600;
+    font-size:15px;
+    margin-bottom:4px;
+  }
+  .arch-box .sub{
+    font-size:13px;
+    color:var(--ink-faint);
+    line-height:1.5;
+  }
+  .arch-arrow{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:0 10px;
+    color:var(--ink-faint);
+    font-family:"IBM Plex Mono", monospace;
+    font-size:18px;
+  }
+  .arch-note{
+    font-size:14px;
+    color:var(--ink-faint);
+    margin-top:18px;
+  }
+
+  @media (max-width: 640px){
+    .arch{ flex-direction:column; }
+    .arch-arrow{ transform:rotate(90deg); padding:6px 0; }
+  }
+
+  /* ---------- Feature blocks ---------- */
+  .feature{
+    display:grid;
+    grid-template-columns:1fr;
+    gap:20px;
+    padding:36px 0;
+    border-top:1px solid var(--line);
+  }
+  .feature:first-of-type{ border-top:none; }
+  .feature h3{ font-size:19px; margin:0 0 8px; }
+  .feature p{ color:var(--ink-dim); font-size:15.5px; margin:0; }
+
+  .shot{
+    border:1px dashed var(--ink-faint);
+    border-radius:10px;
+    background:var(--bg-raised);
+    padding:22px;
+    color:var(--ink-faint);
+  }
+  .shot .shot-label{
+    font-family:"IBM Plex Mono", monospace;
+    font-size:12.5px;
+    color:var(--accent);
+    margin-bottom:6px;
+    display:block;
+  }
+  .shot .shot-desc{
+    font-size:13.5px;
+    line-height:1.55;
+  }
+  .shot img{
+    display:block;
+    width:100%;
+    border-radius:6px;
+  }
+
+  /* ---------- Story blocks ---------- */
+  .story{
+    border-left:2px solid var(--accent-dim);
+    padding:2px 0 2px 22px;
+    margin-bottom:32px;
+  }
+  .story h3{
+    font-size:17.5px;
+    margin:0 0 8px;
+  }
+  .story p{
+    color:var(--ink-dim);
+    font-size:15.5px;
+    margin:0;
+  }
+
+  /* ---------- Limitations ---------- */
+  .limits{
+    list-style:none;
+    margin:24px 0 0;
+    padding:0;
+  }
+  .limits li{
+    padding:14px 0;
+    border-top:1px solid var(--line);
+    color:var(--ink-dim);
+    font-size:15.5px;
+  }
+  .limits li:last-child{ border-bottom:1px solid var(--line); }
+  .limits strong{ color:var(--ink); font-weight:600; }
+
+  /* ---------- Stack footer ---------- */
+  .stack-row{
+    display:flex;
+    flex-wrap:wrap;
+    gap:10px;
+    margin-top:20px;
+  }
+  .stack-pill{
+    font-family:"IBM Plex Mono", monospace;
+    font-size:13px;
+    background:var(--bg-raised);
+    border:1px solid var(--line);
+    padding:6px 12px;
+    border-radius:999px;
+    color:var(--ink-dim);
+  }
+
+  footer{
+    padding:48px 0 80px;
+    color:var(--ink-faint);
+    font-size:14px;
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    html{ scroll-behavior:auto; }
+  }
+</style>
+</head>
+<body>
+
+<!--
+  ============================================================
+  PHOTO PLACEHOLDERS
+  Every dashed box below marks exactly where a screenshot or
+  gif goes, with a label describing what to capture. Replace
+  each .shot div's contents with:
+    <img src="images/whatever.png" alt="...">
+  Use demo_generator/ synthetic data for anything that would
+  otherwise show real friends' hostnames or telemetry.
+  ============================================================
+-->
+
+<header class="hero">
+  <div class="wrap">
+    <div class="meta-row">
+      <span>Personal project</span>
+      <span>Windows agent · FastAPI backend · Supabase · Render</span>
+    </div>
+    <h1>Building an EDR from the ground up taught me more than using one ever could.</h1>
+    <p class="lede">
+      SentryOS is an endpoint detection and response platform I designed, built, and now
+      actually run — a Windows agent, a backend that decides what's worth flagging, and a
+      console my friends log into to see their own machines, and nobody else's.
+    </p>
+
+    <!-- HERO VISUAL: mock alert card, built in HTML/CSS, no photo needed -->
+    <div class="alert-card">
+      <div class="alert-card-top">
+        <span class="sev-pill">Critical</span>
+        <span class="technique-tag">T1562.001</span>
+      </div>
+      <h3>Impair Defenses: Disable or Modify Tools</h3>
+      <p class="endpoint">DESKTOP-T30DKRU · process_create</p>
+      <div class="ai-summary">
+        A PowerShell process launched cmd.exe to run "Set-MpPreference
+        -DisableRealtimeMonitoring True," attempting to turn off Windows Defender
+        real-time protection. First detection of this technique on this host.
+      </div>
+      <div class="lineage">
+        <span class="proc">powershell.exe</span>
+        <span class="arrow">→</span>
+        <span class="proc">cmd.exe</span>
+      </div>
+    </div>
+  </div>
+</header>
+
+<section>
+  <div class="wrap">
+    <h2>What it actually is</h2>
+    <p>
+      SentryOS started as a school project and became something with real stakes: a
+      Windows Service that watches for suspicious activity on a machine, a backend that
+      decides what's worth a human's attention, and a console for reviewing and acting on
+      what it finds. It's not a demo dressed up to look real — the telemetry is real
+      Windows Sysmon and Security-log data, the detections fire against actual activity,
+      and a small group of real people log in to watch their own machines.
+    </p>
+    <p>
+      This is the story of building all three pieces — and the decisions, trade-offs, and
+      bugs that shaped what I ended up with.
+    </p>
+  </div>
+</section>
+
+<section class="on-surface">
+  <div class="wrap-wide">
+    <h2>How it fits together</h2>
+    <p class="section-kicker">Agent on the endpoint, backend deciding what matters, console for the humans</p>
+
+    <div class="arch">
+      <div class="arch-box">
+        <div class="label">Agent</div>
+        <div class="sub">Windows Service · Sysmon + native Security log · PyInstaller</div>
+      </div>
+      <div class="arch-arrow">→</div>
+      <div class="arch-box">
+        <div class="label">Backend</div>
+        <div class="sub">FastAPI on Render · rule matching · AI triage (Groq)</div>
+      </div>
+      <div class="arch-arrow">→</div>
+      <div class="arch-box">
+        <div class="label">Database</div>
+        <div class="sub">Supabase (Postgres)</div>
+      </div>
+    </div>
+    <p class="arch-note">
+      The console is server-rendered off the same backend — no separate frontend service,
+      no API layer to keep in sync with a UI.
+    </p>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <h2>Feature tour</h2>
+    <p class="section-kicker">The console, in the order you'd actually use it</p>
+
+    <div class="feature">
+      <h3>Dashboard</h3>
+      <p>A glanceable overview: severity counts, top techniques, and a real agent-health
+      indicator that polls actual check-ins rather than showing a hardcoded "online" badge.</p>
+      <div class="shot">
+        <span class="shot-label">SCREENSHOT — dashboard.png</span>
+        <span class="shot-desc">Full dashboard with a few real detections visible, the agent-health pill in the topbar showing "N of N online."</span>
+      </div>
+    </div>
+
+    <div class="feature">
+      <h3>Alerts, with real process lineage</h3>
+      <p>Click into any detection and see the actual parent → child process chain pulled
+      from Sysmon telemetry, not a description of it. Bulk actions let you resolve, tag a
+      verdict, or leave a note across several alerts at once.</p>
+      <div class="shot">
+        <span class="shot-label">SCREENSHOT — alert-drawer.png</span>
+        <span class="shot-desc">The alert detail drawer open, process lineage section visible with a real accessing_process → target_process chain.</span>
+      </div>
+    </div>
+
+    <div class="feature">
+      <h3>Incidents</h3>
+      <p>Related alerts on the same host, close together in time, get correlated into one
+      incident instead of showing up as five disconnected rows — a small step toward
+      telling a story instead of a list.</p>
+    </div>
+
+    <div class="feature">
+      <h3>A rules engine anyone can use</h3>
+      <p>Detection logic lives in the database, not in code — write a new rule from the
+      console and it takes effect on the very next event. Rules can be scoped, so one
+      person's custom detection only ever fires on their own machines.</p>
+      <div class="shot">
+        <span class="shot-label">SCREENSHOT — rules-scope.png</span>
+        <span class="shot-desc">Rules page in the "All scopes" admin view, showing the Scope, Created by, and Created columns together.</span>
+      </div>
+    </div>
+
+    <div class="feature">
+      <h3>Real account boundaries</h3>
+      <p>Every user is scoped to their own set of endpoints, enforced on the server, not
+      just hidden in the UI. A member can write their own rules and never sees — or
+      affects — anyone else's machines.</p>
+      <div class="shot">
+        <span class="shot-label">GIF — multi-tenant-demo.gif</span>
+        <span class="shot-desc">Log in as a member account, show the scope indicator, show Settings is hidden, then log in as admin and switch scopes.</span>
+      </div>
+    </div>
+
+    <div class="feature">
+      <h3>The agent itself</h3>
+      <p>Runs as an actual Windows Service — SYSTEM-level, starts at boot, no logged-in
+      user required. It reads native Windows auditing for process creation, and Sysmon
+      for network connections, cross-process memory access, and file writes.</p>
+      <div class="shot">
+        <span class="shot-label">SCREENSHOT — agent-terminal.png</span>
+        <span class="shot-desc">agent.exe running in debug mode, terminal output showing a real Sysmon event caught and forwarded to the backend.</span>
+      </div>
+    </div>
+
+    <div class="feature">
+      <h3>An installer that does the boring parts for you</h3>
+      <p>One double-click: prompts for a license key, silently turns on the Windows
+      auditing settings the agent needs, installs Sysmon with a scoped config, and
+      registers the agent as a service — no PowerShell, no manual steps.</p>
+      <div class="shot">
+        <span class="shot-label">SCREENSHOT — installer-wizard.png</span>
+        <span class="shot-desc">The Inno Setup wizard's license-key entry page.</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="on-surface">
+  <div class="wrap">
+    <h2>Where it got interesting</h2>
+    <p class="section-kicker">The bugs and decisions that actually taught me something</p>
+
+    <div class="story">
+      <h3>The agent that was watching itself</h3>
+      <p>
+        After wiring the agent to read Sysmon's network-connection events, I noticed a
+        wall of repeated entries — the same destination, over and over, several times a
+        second. It was the agent's own outbound calls to the backend: Sysmon was logging
+        the agent reporting an event, which was itself a network connection, which the
+        agent then reported. Found it by counting raw event volume live on a test machine
+        and tracing the flood back to a single source process. Fixed with one exclusion
+        rule in the Sysmon config.
+      </p>
+    </div>
+
+    <div class="story">
+      <h3>A fix that quietly never applied, for weeks</h3>
+      <p>
+        Every time I updated the Sysmon detection config and reinstalled, nothing changed.
+        The actual cause: Sysmon refuses to reinstall its configuration over an
+        already-installed copy, and the installer's silent execution swallowed that
+        failure completely — no error, no warning, just an installer that appeared to
+        succeed while doing nothing. Only surfaced by dumping Sysmon's live configuration
+        directly and noticing it didn't match what I'd just shipped.
+      </p>
+    </div>
+
+    <div class="story">
+      <h3>Losing a detection to a network blip</h3>
+      <p>
+        A transient database disconnect early in the ingestion pipeline could silently
+        drop a real detection before it was ever evaluated. The fix wasn't "retry
+        everything" — it was deciding, function by function, what's worth a retry (the
+        actual alert) versus what's safe to log and move past (a timestamp update). Losing
+        the wrong kind of write is a much bigger problem than losing the other.
+      </p>
+    </div>
+
+    <div class="story">
+      <h3>A service that only worked when I restarted it myself</h3>
+      <p>
+        Windows won't retry a service that fails on its first start — it just stays down.
+        Since the very first thing the agent does is activate over the network, any
+        one-off hiccup at that exact moment could permanently kill an unattended install
+        with nobody watching. Fixed at the OS level with a recovery policy, not by telling
+        people to reboot when something seems off.
+      </p>
+    </div>
+
+    <div class="story">
+      <h3>A login screen isn't an account boundary</h3>
+      <p>
+        Early multi-user support trusted a scope selection stored in a cookie — which
+        meant it was trusted, and editable, entirely on the visitor's own machine. Real
+        separation meant re-checking the account's actual permissions on every single
+        request, server-side, and never taking the browser's word for what it's allowed
+        to see.
+      </p>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <h2>What it doesn't do</h2>
+    <p class="section-kicker">Worth saying plainly, not hiding</p>
+    <ul class="limits">
+      <li><strong>Detection is pattern matching, not behavioral analysis.</strong> A rule
+      checks one field for one condition — real EDR platforms correlate behavior across an
+      entire process tree over time. Building that properly is enterprise infrastructure
+      one team maintains full-time, not a solo project's first version.</li>
+      <li><strong>Agent updates are notify-only, on purpose.</strong> The agent checks
+      whether it's outdated and says so — it doesn't silently replace its own running
+      binary. A Windows Service quietly overwriting itself is exactly the kind of thing
+      that's easy to get subtly wrong, and a bad version pushed silently could break every
+      install at once with no one watching.</li>
+      <li><strong>No process-tree reasoning yet.</strong> The data to build it exists
+      (parent process is already captured); the graph logic that would make "this is fine
+      normally, suspicious with this parent" possible isn't built yet.</li>
+    </ul>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <div class="stack-row">
+      <span class="stack-pill">FastAPI</span>
+      <span class="stack-pill">Supabase / Postgres</span>
+      <span class="stack-pill">Render</span>
+      <span class="stack-pill">Sysmon</span>
+      <span class="stack-pill">Windows Event Log</span>
+      <span class="stack-pill">PyInstaller</span>
+      <span class="stack-pill">Inno Setup</span>
+      <span class="stack-pill">Groq</span>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>
