@@ -492,8 +492,8 @@
           <div class="shot-caption">alerts-list-sanitized.png</div>
         </div>
         <div class="shot filled">
-          <img src="../EDR-Project/alerts-drawer-sanitized.png" alt="Alert detail drawer open over the Alerts page, showing AI analysis, detection details, and process lineage">
-          <div class="shot-caption">alerts-drawer-sanitized.png</div>
+          <img src="../EDR-Project/alert-drawer-sanitized.png" alt="Alert detail drawer open over the Alerts page, showing AI analysis, detection details, and process lineage">
+          <div class="shot-caption">alert-drawer-sanitized.png</div>
         </div>
       </div>
     </div>
@@ -510,9 +510,15 @@
       <p>Detection logic lives in the database, not in code — write a new rule from the
       console and it takes effect on the very next event. Rules can be scoped, so one
       person's custom detection only ever fires on their own machines.</p>
-      <div class="shot">
-        <span class="shot-label">rules-scope-sanitized.png</span>
-        <span class="shot-desc">Rules page in the "All scopes" admin view, showing the Scope, Created by, and Created columns together.</span>
+      <div class="shot-gallery">
+        <div class="shot filled">
+          <img src="../EDR-Project/rules-scope-left-sanitized.png" alt="SentryOS Rules page showing rule status, name, condition, and severity columns">
+          <div class="shot-caption">rules-scope-left-sanitized.png</div>
+        </div>
+        <div class="shot filled">
+          <img src="../EDR-Project/rules-scope-right-sanitized.png" alt="SentryOS Rules page scrolled right, showing the Scope, Created by, and Created columns">
+          <div class="shot-caption">rules-scope-right-sanitized.png</div>
+        </div>
       </div>
     </div>
 
@@ -521,9 +527,9 @@
       <p>Every user is scoped to their own set of endpoints, enforced on the server, not
       just hidden in the UI. A member can write their own rules and never sees — or
       affects — anyone else's machines.</p>
-      <div class="shot">
-        <span class="shot-label">multi-tenant-demo-sanitized.gif</span>
-        <span class="shot-desc">Log in as a member account, show the scope indicator, show Settings is hidden, then log in as admin and switch scopes.</span>
+      <div class="shot filled">
+        <img src="../EDR-Project/multi-tenant-demo-sanitized.gif" alt="Logging in as a scoped member account, then as admin switching between scopes">
+        <div class="shot-caption">multi-tenant-demo-sanitized.gif</div>
       </div>
     </div>
 
@@ -532,9 +538,9 @@
       <p>Runs as an actual Windows Service — SYSTEM-level, starts at boot, no logged-in
       user required. It reads native Windows auditing for process creation, and Sysmon
       for network connections, cross-process memory access, and file writes.</p>
-      <div class="shot">
-        <span class="shot-label">agent-terminal-sanitized.png</span>
-        <span class="shot-desc">agent.exe running in debug mode, terminal output showing a real Sysmon event caught and forwarded to the backend.</span>
+      <div class="shot filled">
+        <img src="../EDR-Project/agent-terminal-sanitized.png" alt="agent.exe running in debug mode, terminal output showing a Sysmon event caught and forwarded to the backend">
+        <div class="shot-caption">agent-terminal-sanitized.png</div>
       </div>
     </div>
 
@@ -543,9 +549,9 @@
       <p>One double-click: prompts for a license key, silently turns on the Windows
       auditing settings the agent needs, installs Sysmon with a scoped config, and
       registers the agent as a service — no PowerShell, no manual steps.</p>
-      <div class="shot">
-        <span class="shot-label">installer-wizard-sanitized.png</span>
-        <span class="shot-desc">The Inno Setup wizard's license-key entry page.</span>
+      <div class="shot filled">
+        <img src="../EDR-Project/installer-wizard-sanitized.png" alt="Inno Setup installer wizard's license-key entry page">
+        <div class="shot-caption">installer-wizard-sanitized.png</div>
       </div>
     </div>
   </div>
