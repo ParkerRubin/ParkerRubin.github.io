@@ -295,6 +295,11 @@
     font-size:12px;
     color:var(--ink-faint);
   }
+  .shot-gallery{
+    display:flex;
+    flex-direction:column;
+    gap:16px;
+  }
 
   /* ---------- Story blocks ---------- */
   .story{
@@ -367,9 +372,12 @@
   correctly resolves back into the same folder - confirmed
   against the real repo listing)
 
-  Still-empty dashed boxes below mark exactly where the
-  remaining screenshots/gifs go. Replace a .shot div's
-  contents with:
+  IMPORTANT: this is NOT automatic. A .shot div only shows an
+  image because someone (Claude) manually swapped its dashed
+  placeholder markup for a real <img> tag once that specific
+  file was confirmed sanitized and named correctly. The
+  remaining dashed boxes below still need that same manual
+  step done for each one as their screenshots come in:
     <img src="../EDR-Project/whatever-sanitized.png" alt="...">
   Use demo_generator/ synthetic data for anything that would
   otherwise show real friends' hostnames or telemetry.
@@ -478,10 +486,15 @@
       <p>Click into any detection and see the actual parent → child process chain pulled
       from Sysmon telemetry, not a description of it. Bulk actions let you resolve, tag a
       verdict, or leave a note across several alerts at once.</p>
-      <div class="shot">
-        <span class="shot-label">alerts-drawer-sanitized.png</span>
-        <span class="shot-label">alerts-list-sanitized.png</span>
-        <span class="shot-desc">The alert detail drawer open, process lineage section visible with a real accessing_process → target_process chain.</span>
+      <div class="shot-gallery">
+        <div class="shot filled">
+          <img src="../EDR-Project/alerts-list-sanitized.png" alt="SentryOS Alerts page listing detections with severity, technique, and AI confidence columns">
+          <div class="shot-caption">alerts-list-sanitized.png</div>
+        </div>
+        <div class="shot filled">
+          <img src="../EDR-Project/alert-drawer-sanitized.png" alt="Alert detail drawer open over the Alerts page, showing AI analysis, detection details, and process lineage">
+          <div class="shot-caption">alert-drawer-sanitized.png</div>
+        </div>
       </div>
     </div>
 
