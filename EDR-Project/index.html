@@ -1,11 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+   <link rel="icon" type="image/svg+xml" href="../icon/favicon.svg" />
+   <link rel="icon" type="image/png" sizes="32x32" href="../icon/favicon-32.png" />
+   <link rel="apple-touch-icon" href="../icon/apple-touch-icon.png" />
 
-   <link rel="icon" type="image/svg+xml" href="icon/favicon.svg" />
-   <link rel="icon" type="image/png" sizes="32x32" href="icon/favicon-32.png" />
-   <link rel="apple-touch-icon" href="icon/apple-touch-icon.png" />
-  
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>SentryOS — building an EDR from the ground up</title>
@@ -74,6 +73,17 @@
   p{ color:var(--ink); }
   .lede{ color:var(--ink-dim); }
 
+  .back-link{
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+    color:var(--ink-faint);
+    font-size:14px;
+    margin-bottom:32px;
+    text-decoration:none;
+  }
+  .back-link:hover{ color:var(--accent); }
+
   /* ---------- Hero ---------- */
   .hero{
     padding:88px 0 64px;
@@ -91,17 +101,6 @@
     max-width:56ch;
     margin:0 0 40px;
   }
-  .back-link{
-    display:inline-flex;
-    align-items:center;
-    gap:6px;
-    color:var(--ink-faint);
-    font-size:14px;
-    margin-bottom:32px;
-    text-decoration:none;
-  }
-  .back-link:hover{ color:var(--accent); }
-
   .meta-row{
     display:flex;
     gap:18px;
@@ -283,6 +282,18 @@
     display:block;
     width:100%;
     border-radius:6px;
+    border:1px solid var(--line);
+  }
+  .shot.filled{
+    border-style:solid;
+    padding:0;
+    overflow:hidden;
+  }
+  .shot-caption{
+    padding:12px 16px;
+    font-family:"IBM Plex Mono", monospace;
+    font-size:12px;
+    color:var(--ink-faint);
   }
 
   /* ---------- Story blocks ---------- */
@@ -349,10 +360,17 @@
 <!--
   ============================================================
   PHOTO PLACEHOLDERS
-  Every dashed box below marks exactly where a screenshot or
-  gif goes, with a label describing what to capture. Replace
-  each .shot div's contents with:
-    <img src="images/whatever.png" alt="...">
+
+  Naming convention: every image is <name>-sanitized.<ext>
+  Path convention:   ../EDR-Project/<name>-sanitized.<ext>
+  (this file lives at EDR-Project/index.html, so ../EDR-Project/
+  correctly resolves back into the same folder - confirmed
+  against the real repo listing)
+
+  Still-empty dashed boxes below mark exactly where the
+  remaining screenshots/gifs go. Replace a .shot div's
+  contents with:
+    <img src="../EDR-Project/whatever-sanitized.png" alt="...">
   Use demo_generator/ synthetic data for anything that would
   otherwise show real friends' hostnames or telemetry.
   ============================================================
@@ -449,9 +467,9 @@
       <h3>Dashboard</h3>
       <p>A glanceable overview: severity counts, top techniques, and a real agent-health
       indicator that polls actual check-ins rather than showing a hardcoded "online" badge.</p>
-      <div class="shot">
-        <span class="shot-label">SCREENSHOT — dashboard.png</span>
-        <span class="shot-desc">Full dashboard with a few real detections visible, the agent-health pill in the topbar showing "N of N online."</span>
+      <div class="shot filled">
+        <img src="../EDR-Project/dashboard-sanitized.png" alt="SentryOS dashboard showing detection counts, severity distribution, top techniques, and reporting endpoints">
+        <div class="shot-caption">dashboard-sanitized.png</div>
       </div>
     </div>
 
@@ -461,7 +479,7 @@
       from Sysmon telemetry, not a description of it. Bulk actions let you resolve, tag a
       verdict, or leave a note across several alerts at once.</p>
       <div class="shot">
-        <span class="shot-label">SCREENSHOT — alert-drawer.png</span>
+        <span class="shot-label">alert-drawer-sanitized.png</span>
         <span class="shot-desc">The alert detail drawer open, process lineage section visible with a real accessing_process → target_process chain.</span>
       </div>
     </div>
@@ -479,7 +497,7 @@
       console and it takes effect on the very next event. Rules can be scoped, so one
       person's custom detection only ever fires on their own machines.</p>
       <div class="shot">
-        <span class="shot-label">SCREENSHOT — rules-scope.png</span>
+        <span class="shot-label">rules-scope-sanitized.png</span>
         <span class="shot-desc">Rules page in the "All scopes" admin view, showing the Scope, Created by, and Created columns together.</span>
       </div>
     </div>
@@ -490,7 +508,7 @@
       just hidden in the UI. A member can write their own rules and never sees — or
       affects — anyone else's machines.</p>
       <div class="shot">
-        <span class="shot-label">GIF — multi-tenant-demo.gif</span>
+        <span class="shot-label">multi-tenant-demo-sanitized.gif</span>
         <span class="shot-desc">Log in as a member account, show the scope indicator, show Settings is hidden, then log in as admin and switch scopes.</span>
       </div>
     </div>
@@ -501,7 +519,7 @@
       user required. It reads native Windows auditing for process creation, and Sysmon
       for network connections, cross-process memory access, and file writes.</p>
       <div class="shot">
-        <span class="shot-label">SCREENSHOT — agent-terminal.png</span>
+        <span class="shot-label">agent-terminal-sanitized.png</span>
         <span class="shot-desc">agent.exe running in debug mode, terminal output showing a real Sysmon event caught and forwarded to the backend.</span>
       </div>
     </div>
@@ -512,7 +530,7 @@
       auditing settings the agent needs, installs Sysmon with a scoped config, and
       registers the agent as a service — no PowerShell, no manual steps.</p>
       <div class="shot">
-        <span class="shot-label">SCREENSHOT — installer-wizard.png</span>
+        <span class="shot-label">installer-wizard-sanitized.png</span>
         <span class="shot-desc">The Inno Setup wizard's license-key entry page.</span>
       </div>
     </div>
