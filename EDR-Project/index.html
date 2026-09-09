@@ -86,6 +86,17 @@
     max-width:56ch;
     margin:0 0 40px;
   }
+  .back-link{
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+    color:var(--ink-faint);
+    font-size:14px;
+    margin-bottom:32px;
+    text-decoration:none;
+  }
+  .back-link:hover{ color:var(--accent); }
+
   .meta-row{
     display:flex;
     gap:18px;
@@ -344,6 +355,7 @@
 
 <header class="hero">
   <div class="wrap">
+    <a href="../blog.html" class="back-link">← Back to writeups</a>
     <div class="meta-row">
       <span>Personal project</span>
       <span>Windows agent · FastAPI backend · Supabase · Render</span>
