@@ -1,808 +1,242 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-   <link rel="icon" type="image/svg+xml" href="../icon/favicon.svg" />
-   <link rel="icon" type="image/png" sizes="32x32" href="../icon/favicon-32.png" />
-   <link rel="apple-touch-icon" href="../icon/apple-touch-icon.png" />
+  <head>
 
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>SentryOS - building an EDR from the ground up</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
-<style>
-  :root{
-    --bg-void:#0A0E14;
-    --bg-surface:#121722;
-    --bg-raised:#171D2B;
-    --ink:#E7EAF0;
-    --ink-dim:#8891A3;
-    --ink-faint:#5B6478;
-    --line:#232B3D;
-    --accent:#8B7CF6;
-    --accent-dim:#4C4488;
-    --critical:#F0536D;
-    --high:#F5A34B;
-    --medium:#EFC94C;
-    --low:#5AA9E6;
-    --info:#7A8494;
-  }
+    <link rel="icon" type="image/svg+xml" href="icon/favicon.svg" />
+    <link rel="icon" type="image/png" sizes="32x32" href="icon/favicon-32.png" />
+    <link rel="apple-touch-icon" href="icon/apple-touch-icon.png" />
+    
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#0A0E14" />
+    <meta name="description" content="Parker Rubin, Computer Science student focused on cybersecurity and blue team operations." />
+    <title>Parker Rubin</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+      rel="stylesheet"
+    />
+    <link href="assets/style/style.css" rel="stylesheet" />
 
-  *{box-sizing:border-box;}
-  html{scroll-behavior:smooth;}
+    <!--
+      Dark-theme override, scoped to this page only. Everything in
+      style.css is built on the :root custom properties below, so
+      redefining just the tokens (rather than rewriting every rule)
+      reskins the whole page consistently. blog.html and the individual
+      posts still use the original light tokens from style.css itself,
+      so there will be a visible split between Profile (dark) and Blog
+      (light) until/unless those get the same treatment.
+    -->
+    <style>
+      :root {
+        --bg: #0A0E14;
+        --surface: #171D2B;
+        --ink: #E7EAF0;
+        --muted: #8891A3;
+        --line: #232B3D;
+        --accent: #8B7CF6;
+        --accent-soft: rgba(139, 124, 246, 0.09);
+        --accent-2: #2DD4BF;
+        --accent-2-soft: rgba(45, 212, 191, 0.14);
+        --accent-3: #F5A34B;
+        --accent-3-soft: rgba(245, 163, 75, 0.07);
+      }
 
-  body{
-    margin:0;
-    background:var(--bg-void);
-    color:var(--ink);
-    font-family:"IBM Plex Sans", sans-serif;
-    font-size:17px;
-    line-height:1.65;
-    -webkit-font-smoothing:antialiased;
-  }
+      /* The hero's ambient glow (radial gradients behind the portrait)
+         blended invisibly into the original light background at just
+         2px of blur. Against the new dark background, that same box
+         read as a hard-edged rectangle, and clipping it to the hero
+         (overflow: hidden, to stop it bleeding into the tab-nav above)
+         introduced a new version of the same problem: the glow didn't
+         fully fade to nothing before hitting that clip boundary, so the
+         hero's own box silhouette became visible instead. Padding gives
+         it room to dissipate before the edge, and a lower opacity on
+         the soft tokens above makes any residual edge far less
+         noticeable either way. */
+      .hero {
+        overflow: hidden;
+        padding: 2.5rem 0 1rem;
+      }
+      .hero::before {
+        top: 0;
+        filter: blur(60px);
+      }
+    </style>
+  </head>
+  <body>
+    <main class="page">
 
-  ::selection{ background:var(--accent-dim); color:#fff; }
+      <!-- Tabs -->
+      <nav class="tab-nav">
+        <a href="index.html" class="active">Profile</a>
+        <a href="blog.html">Blog</a>
+      </nav>
 
-  a{ color:var(--accent); }
-  a:focus-visible, button:focus-visible, summary:focus-visible{
-    outline:2px solid var(--accent);
-    outline-offset:3px;
-  }
+      <!-- Hero -->
+      <section class="hero">
+        <div class="portrait">
+          <img src="assets/profile-picture.webp" alt="Parker Rubin" />
+        </div>
+        <h1 class="name" id="name">Parker Rubin</h1>
+        <span class="accent-line" aria-hidden="true"></span>
+        <p class="role">Computer science student focused on cybersecurity and blue team operations</p>
+        <p class="location"><i class="fa-solid fa-location-dot"></i> Boca Raton, Florida</p>
+      </section>
 
-  h1,h2,h3{
-    font-family:"Space Grotesk", sans-serif;
-    font-weight:600;
-    letter-spacing:-0.01em;
-    color:var(--ink);
-  }
-
-  code, .mono{ font-family:"IBM Plex Mono", monospace; }
-
-  .wrap{
-    max-width:720px;
-    margin:0 auto;
-    padding:0 24px;
-  }
-  .wrap-wide{
-    max-width:880px;
-    margin:0 auto;
-    padding:0 24px;
-  }
-
-  p{ color:var(--ink); }
-  .lede{ color:var(--ink-dim); }
-
-  .back-link{
-    display:inline-flex;
-    align-items:center;
-    gap:6px;
-    color:var(--ink-faint);
-    font-size:14px;
-    margin-bottom:32px;
-    text-decoration:none;
-  }
-  .back-link:hover{ color:var(--accent); }
-
-  /* ---------- Hero ---------- */
-  .hero{
-    padding:88px 0 64px;
-    border-bottom:1px solid var(--line);
-  }
-  .hero h1{
-    font-size:clamp(32px, 5vw, 46px);
-    line-height:1.15;
-    margin:0 0 20px;
-    max-width:14ch;
-  }
-  .hero p{
-    font-size:19px;
-    color:var(--ink-dim);
-    max-width:56ch;
-    margin:0 0 40px;
-  }
-  .meta-row{
-    display:flex;
-    gap:18px;
-    flex-wrap:wrap;
-    font-size:14px;
-    color:var(--ink-faint);
-    margin-bottom:48px;
-  }
-
-  /* ---------- Mock alert card (hero visual) ---------- */
-  .alert-card{
-    background:var(--bg-surface);
-    border:1px solid var(--line);
-    border-radius:10px;
-    padding:20px 22px;
-    max-width:600px;
-    box-shadow:0 24px 60px -20px rgba(0,0,0,.6);
-  }
-  .alert-card-top{
-    display:flex;
-    align-items:center;
-    gap:10px;
-    margin-bottom:14px;
-  }
-  .sev-pill{
-    display:inline-flex;
-    align-items:center;
-    gap:6px;
-    font-size:12.5px;
-    font-weight:500;
-    padding:3px 10px;
-    border-radius:999px;
-    background:rgba(240,83,109,.14);
-    color:var(--critical);
-  }
-  .sev-pill::before{
-    content:"";
-    width:6px; height:6px;
-    border-radius:50%;
-    background:currentColor;
-  }
-  .technique-tag{
-    font-family:"IBM Plex Mono", monospace;
-    font-size:12.5px;
-    background:var(--bg-raised);
-    border:1px solid var(--line);
-    color:var(--accent);
-    padding:2px 8px;
-    border-radius:6px;
-  }
-  .alert-card h3{
-    font-size:17px;
-    margin:0 0 4px;
-    font-family:"IBM Plex Sans", sans-serif;
-    font-weight:600;
-  }
-  .alert-card .endpoint{
-    font-size:13.5px;
-    color:var(--ink-faint);
-    margin:0 0 16px;
-  }
-  .alert-card .ai-summary{
-    background:var(--bg-raised);
-    border-left:2px solid var(--accent);
-    padding:10px 14px;
-    font-size:14.5px;
-    color:var(--ink-dim);
-    border-radius:0 6px 6px 0;
-  }
-  .lineage{
-    display:flex;
-    align-items:center;
-    gap:8px;
-    margin-top:16px;
-    font-family:"IBM Plex Mono", monospace;
-    font-size:12px;
-  }
-  .lineage span.proc{
-    background:var(--bg-raised);
-    border:1px solid var(--line);
-    padding:4px 9px;
-    border-radius:6px;
-    color:var(--ink-dim);
-  }
-  .lineage .arrow{ color:var(--ink-faint); }
-
-  /* ---------- Sections ---------- */
-  section{ padding:64px 0; }
-  section.on-surface{ background:var(--bg-surface); border-top:1px solid var(--line); border-bottom:1px solid var(--line); }
-
-  h2{
-    font-size:28px;
-    margin:0 0 8px;
-  }
-  .section-kicker{
-    font-size:14.5px;
-    color:var(--ink-faint);
-    margin:0 0 36px;
-  }
-
-  /* ---------- Architecture diagram ---------- */
-  .arch{
-    display:flex;
-    align-items:stretch;
-    gap:0;
-    flex-wrap:wrap;
-    margin:36px 0 8px;
-  }
-  .arch-box{
-    background:var(--bg-raised);
-    border:1px solid var(--line);
-    border-radius:10px;
-    padding:18px 20px;
-    flex:1 1 160px;
-    min-width:150px;
-  }
-  .arch-box .label{
-    font-family:"Space Grotesk", sans-serif;
-    font-weight:600;
-    font-size:15px;
-    margin-bottom:4px;
-  }
-  .arch-box .sub{
-    font-size:13px;
-    color:var(--ink-faint);
-    line-height:1.5;
-  }
-  .arch-arrow{
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    padding:0 10px;
-    color:var(--ink-faint);
-    font-family:"IBM Plex Mono", monospace;
-    font-size:18px;
-  }
-  .arch-note{
-    font-size:14px;
-    color:var(--ink-faint);
-    margin-top:18px;
-  }
-
-  @media (max-width: 640px){
-    .arch{ flex-direction:column; }
-    .arch-arrow{ transform:rotate(90deg); padding:6px 0; }
-  }
-
-  /* ---------- Feature blocks ---------- */
-  .feature{
-    display:grid;
-    grid-template-columns:1fr;
-    gap:20px;
-    padding:36px 0;
-    border-top:1px solid var(--line);
-  }
-  .feature:first-of-type{ border-top:none; }
-  .feature h3{ font-size:19px; margin:0 0 8px; }
-  .feature p{ color:var(--ink-dim); font-size:15.5px; margin:0; }
-
-  .shot{
-    border:1px dashed var(--ink-faint);
-    border-radius:10px;
-    background:var(--bg-raised);
-    padding:22px;
-    color:var(--ink-faint);
-  }
-  .shot .shot-label{
-    font-family:"IBM Plex Mono", monospace;
-    font-size:12.5px;
-    color:var(--accent);
-    margin-bottom:6px;
-    display:block;
-  }
-  .shot .shot-desc{
-    font-size:13.5px;
-    line-height:1.55;
-  }
-  .shot img{
-    display:block;
-    width:100%;
-    border-radius:6px;
-    border:1px solid var(--line);
-  }
-  .shot.filled{
-    border-style:solid;
-    padding:0;
-    overflow:hidden;
-  }
-  .shot-caption{
-    padding:12px 16px;
-    font-family:"IBM Plex Mono", monospace;
-    font-size:12px;
-    color:var(--ink-faint);
-  }
-  .shot-gallery{
-    display:flex;
-    flex-direction:column;
-    gap:16px;
-  }
-
-  /* ---------- Infra callout (mid feature-tour pause) ---------- */
-  .infra-note{
-    background:var(--bg-raised);
-    border:1px solid var(--accent-dim);
-    border-radius:10px;
-    padding:20px 22px;
-  }
-  .infra-note h3{ font-size:17px; margin:0 0 8px; }
-  .infra-note p{ margin:0; color:var(--ink-dim); font-size:15px; }
-
-  /* ---------- Story blocks ---------- */
-  .story{
-    border-left:2px solid var(--accent-dim);
-    padding:2px 0 2px 22px;
-    margin-bottom:32px;
-  }
-  .story h3{
-    font-size:17.5px;
-    margin:0 0 8px;
-  }
-  .story p{
-    color:var(--ink-dim);
-    font-size:15.5px;
-    margin:0;
-  }
-
-  /* ---------- Limitations ---------- */
-  .limits{
-    list-style:none;
-    margin:24px 0 0;
-    padding:0;
-  }
-  .limits li{
-    padding:14px 0;
-    border-top:1px solid var(--line);
-    color:var(--ink-dim);
-    font-size:15.5px;
-  }
-  .limits li:last-child{ border-bottom:1px solid var(--line); }
-  .limits strong{ color:var(--ink); font-weight:600; }
-
-  /* ---------- Stack footer ---------- */
-  .stack-row{
-    display:flex;
-    flex-wrap:wrap;
-    gap:10px;
-    margin-top:20px;
-  }
-  .stack-pill{
-    font-family:"IBM Plex Mono", monospace;
-    font-size:13px;
-    background:var(--bg-raised);
-    border:1px solid var(--line);
-    padding:6px 12px;
-    border-radius:999px;
-    color:var(--ink-dim);
-  }
-
-  footer{
-    padding:48px 0 80px;
-    color:var(--ink-faint);
-    font-size:14px;
-  }
-
-  @media (prefers-reduced-motion: reduce){
-    html{ scroll-behavior:auto; }
-  }
-</style>
-</head>
-<body>
-
-<!--
-  ============================================================
-  PHOTO PLACEHOLDERS
-
-  Naming convention: every image is <name>-sanitized.<ext>
-  Path convention:   ../EDR-Project/<name>-sanitized.<ext>
-  (this file lives at EDR-Project/index.html, so ../EDR-Project/
-  correctly resolves back into the same folder - confirmed
-  against the real repo listing)
-
-  IMPORTANT: this is NOT automatic. A .shot div only shows an
-  image because someone (Claude) manually swapped its dashed
-  placeholder markup for a real <img> tag once that specific
-  file was confirmed sanitized and named correctly. Several
-  sections below are pre-wired with an expected filename ahead
-  of actually having the screenshot yet - until that file
-  exists in EDR-Project/, the browser will show a broken-image
-  icon there instead of a dashed box. That's expected; drop the
-  file in with the exact matching name and it resolves itself.
-  Use demo_generator/ synthetic data for anything that would
-  otherwise show real friends' hostnames or telemetry.
-  ============================================================
--->
-
-<header class="hero">
-  <div class="wrap">
-    <a href="../blog.html" class="back-link">← Back to writeups</a>
-    <div class="meta-row">
-      <span>Personal project</span>
-      <span>Windows agent · FastAPI backend · Supabase · Render</span>
-    </div>
-    <h1>Building an EDR from the ground up taught me more than using one ever could.</h1>
-    <p class="lede">
-      SentryOS is an endpoint detection and response platform I designed, built, and now
-      actually run: a Windows agent, a backend that decides what's worth flagging, and a
-      console my friends log into to see their own machines, and nobody else's.
-    </p>
-
-    <!-- HERO VISUAL: mock alert card, built in HTML/CSS, no photo needed -->
-    <div class="alert-card">
-      <div class="alert-card-top">
-        <span class="sev-pill">Critical</span>
-        <span class="technique-tag">T1562.001</span>
-      </div>
-      <h3>Impair Defenses: Disable or Modify Tools</h3>
-      <p class="endpoint">DESKTOP-T30DKRU · process_create</p>
-      <div class="ai-summary">
-        A PowerShell process launched cmd.exe to run "Set-MpPreference
-        -DisableRealtimeMonitoring True," attempting to turn off Windows Defender
-        real-time protection. First detection of this technique on this host.
-      </div>
-      <div class="lineage">
-        <span class="proc">powershell.exe</span>
-        <span class="arrow">→</span>
-        <span class="proc">cmd.exe</span>
-      </div>
-    </div>
-  </div>
-</header>
-
-<section>
-  <div class="wrap">
-    <h2>What it actually is</h2>
-    <p>
-      SentryOS started as a school project and became something with real stakes: a
-      Windows Service that watches for suspicious activity on a machine, a backend that
-      decides what's worth a human's attention, and a console for reviewing and acting on
-      what it finds. It's not a demo dressed up to look real. The telemetry is real
-      Windows Sysmon and Security-log data, the detections fire against actual activity,
-      and a small group of real people log in to watch their own machines.
-    </p>
-    <p>
-      This is the story of building all three pieces, and the decisions, trade-offs, and
-      bugs that shaped what I ended up with.
-    </p>
-  </div>
-</section>
-
-<section class="on-surface">
-  <div class="wrap-wide">
-    <h2>How it fits together</h2>
-    <p class="section-kicker">Agent on the endpoint, backend deciding what matters, console for the humans</p>
-
-    <div class="arch">
-      <div class="arch-box">
-        <div class="label">Agent</div>
-        <div class="sub">Windows Service · Sysmon + native Security log · PyInstaller</div>
-      </div>
-      <div class="arch-arrow">→</div>
-      <div class="arch-box">
-        <div class="label">Backend</div>
-        <div class="sub">FastAPI on Render · rule matching · AI triage (Groq)</div>
-      </div>
-      <div class="arch-arrow">→</div>
-      <div class="arch-box">
-        <div class="label">Database</div>
-        <div class="sub">Supabase (Postgres)</div>
-      </div>
-    </div>
-    <p class="arch-note">
-      The console is server-rendered off the same backend, with no separate frontend
-      service and no API layer to keep in sync with a UI.
-    </p>
-  </div>
-</section>
-
-<section>
-  <div class="wrap">
-    <h2>Feature tour</h2>
-    <p class="section-kicker">The console, in the order you'd actually use it</p>
-
-    <div class="feature">
-      <h3>Dashboard</h3>
-      <p>A glanceable overview: severity counts, top techniques, and a real agent-health
-      indicator that polls actual check-ins rather than showing a hardcoded "online" badge.</p>
-      <div class="shot filled">
-        <img src="../EDR-Project/dashboard-sanitized.png" alt="SentryOS dashboard showing detection counts, severity distribution, top techniques, and reporting endpoints">
-        <div class="shot-caption">dashboard-sanitized.png</div>
-      </div>
-    </div>
-
-    <div class="feature">
-      <div class="infra-note">
-        <h3>Before going further: how this is actually running</h3>
+      <!-- About -->
+      <section class="block" id="about">
+        <h2 class="accent-a">About</h2>
         <p>
-          This isn't a local demo. The backend is a FastAPI service deployed on Render,
-          and every event, rule, user, and license key lives in a Supabase Postgres
-          database, both free-tier, both run like a real (if small) production service,
-          cold starts and all. Everything below is a screenshot of that live system, not
-          a mockup.
+          I'm a Computer Science student at FAU with experience as a SOC Analyst intern,
+          working across alert triage, incident response, and system level tooling. I care
+          about both sides of the fence: blue team detection and response, and the
+          offensive thinking that makes a detection rule worth writing in the first place,
+          since you can't catch what you don't understand.
         </p>
-      </div>
-    </div>
+        <p>
+          That's part of why I build instead of just use. SentryOS, a full EDR platform
+          with an AI-assisted triage layer, taught me more about real detection
+          engineering than any single course did. I'm especially interested in DFIR, blue
+          team operations, and figuring out where AI actually earns a place in a security
+          workflow, not bolted on for the sake of it.
+        </p>
+      </section>
 
-    <div class="feature">
-      <h3>Alerts, with real process lineage</h3>
-      <p>Click into any detection and see the actual parent → child process chain pulled
-      from Sysmon telemetry, not a description of it. Bulk actions let you resolve, tag a
-      verdict, or leave a note across several alerts at once.</p>
-      <div class="shot-gallery">
-        <div class="shot filled">
-          <img src="../EDR-Project/alerts-list-sanitized.png" alt="SentryOS Alerts page listing detections with severity, technique, and AI confidence columns">
-          <div class="shot-caption">alerts-list-sanitized.png</div>
+      <!-- Projects -->
+      <section class="block" id="projects">
+        <h2 class="accent-b">Projects</h2>
+        <a class="project-row" href="posts/bec-phishing.html">
+          <div class="project-text">
+            <h3>Catch Me If You Can, BEC Phishing Investigation</h3>
+            <p>Traced a business email compromise phishing campaign through raw SMTP traffic in Wireshark, isolating the malicious sender IP and extracting the phishing emails from packet captures</p>
+          </div>
+          <i class="fa-solid fa-arrow-up-right"></i>
+        </a>
+
+        <a class="project-row" href="../EDR-Project/index.html">
+          <div class="project-text">
+            <h3>SentryOS - building an EDR from the ground up</h3>
+            <p>SentryOS is an endpoint detection and response platform I designed, built, and now
+      actually run: a Windows agent, a backend that decides what's worth flagging, and a
+      console my friends log into to see their own machines, and nobody else's.</p>
+          </div>
+          <i class="fa-solid fa-arrow-up-right"></i>
+        </a>
+      </section>
+
+      <!-- Certifications -->
+      <section class="block" id="certifications">
+        <h2 class="accent-c">Certifications</h2>
+
+        <div class="accordion">
+          <button class="accordion-header" aria-expanded="false">
+            <span>SentinelOne IR Engineer (SIREN)</span>
+            <i class="fa-solid fa-chevron-down"></i>
+          </button>
+          <div class="accordion-panel">
+            <p>
+              Employer sponsored capstone certification for incident response partners.
+              Covered Deep Visibility (S1QL) threat hunting, Storyline based investigation,
+              Singularity blocklist and exclusion administration, incident handling
+              workflows, and false positive tuning across the SentinelOne EDR platform.
+            </p>
+            <ul class="badge-list">
+              <li>Threat Hunting I: Hunting in Ops Center, Feb 2026</li>
+              <li>Troubleshooting Windows Agent Interoperability Issues, Mar 2026</li>
+              <li>Troubleshooting Endpoint Performance Issues, Mar 2026</li>
+              <li>Singularity Administration: Managing Blocklists and Exclusions, Mar 2026</li>
+              <li>Incident Response: Incident Handling with the Singularity Platform, Mar 2026</li>
+              <li>Incident Response: Tuning to Reduce False Positives with SentinelOne, Mar 2026</li>
+            </ul>
+          </div>
         </div>
-        <div class="shot filled">
-          <img src="../EDR-Project/alerts-drawer-sanitized.png" alt="Alert detail drawer open over the Alerts page, showing AI analysis, detection details, and process lineage">
-          <div class="shot-caption">alerts-drawer-sanitized.png</div>
+
+        <div class="accordion">
+          <button class="accordion-header" aria-expanded="false">
+            <span>IBM SkillsBuild Cybersecurity Certificate</span>
+            <i class="fa-solid fa-chevron-down"></i>
+          </button>
+          <div class="accordion-panel">
+            <p>
+              Six badge cybersecurity certificate track covering governance and risk,
+              vulnerability management, system and network security, cloud security,
+              security operations, and incident response and forensics. In progress.
+            </p>
+            <ul class="badge-list">
+              <li>Governance, Risk, Compliance, and Data Privacy, Jul 2026</li>
+              <li>Vulnerability Management, Jul 2026</li>
+              <li>System and Network Security, Jul 2026</li>
+              <!-- Add remaining badges as earned:
+              <li>Cloud Security, Month Year</li>
+              <li>Security Operations and Management, Month Year</li>
+              <li>Incident Response and System Forensics, Month Year</li>
+              -->
+            </ul>
+          </div>
         </div>
-      </div>
-    </div>
 
-    <div class="feature">
-      <h3>Incidents</h3>
-      <p>Related alerts on the same host, close together in time, get correlated into one
-      incident instead of showing up as five disconnected rows, a small step toward
-      telling a story instead of a list.</p>
-      <div class="shot filled">
-        <img src="../EDR-Project/incidents-sanitized.png" alt="SentryOS Incidents page showing alerts on the same host correlated into one incident">
-        <div class="shot-caption">incidents-sanitized.png</div>
-      </div>
-    </div>
-
-    <div class="feature">
-      <h3>Endpoints</h3>
-      <p>Every machine that's ever activated shows up here, not just the ones that
-      happened to trigger an alert. Agent status (online, stale, offline), reported
-      version, and a per-host severity mix make this the place to check whether the fleet
-      is actually healthy, a separate question from whether anything's actually wrong.</p>
-      <div class="shot filled">
-        <img src="../EDR-Project/endpoints-sanitized.png" alt="SentryOS Endpoints page listing every registered host with agent status, version, and severity mix">
-        <div class="shot-caption">endpoints-sanitized.png</div>
-      </div>
-    </div>
-
-    <div class="feature">
-      <h3>AI Analyst</h3>
-      <p>Pick an alert, ask it a plain question ("did this touch the registry," "is this
-      the same process as the last one"), and get an answer grounded in that specific
-      event's raw data. It only ever reasons about the one alert you point it at, not a
-      general chat about the whole environment.</p>
-      <div class="shot filled">
-        <img src="../EDR-Project/ai-analyst-sanitized.png" alt="AI Analyst page showing a question asked about a specific alert and its grounded answer">
-        <div class="shot-caption">ai-analyst-sanitized.png</div>
-      </div>
-    </div>
-
-    <div class="feature">
-      <h3>Event Search</h3>
-      <p>The actual data lake: every event the agent ever sent, matched by a rule or not,
-      searchable by host, type, or free text. Alerts answers "what's worth acting on";
-      this answers "what actually happened," and the two are deliberately different
-      questions with deliberately different answers.</p>
-      <div class="shot filled">
-        <img src="../EDR-Project/event-search-sanitized.png" alt="Event Search page showing raw events searchable by host, type, and free text">
-        <div class="shot-caption">event-search-sanitized.png</div>
-      </div>
-    </div>
-
-    <div class="feature">
-      <h3>A rules engine anyone can use</h3>
-      <p>Detection logic lives in the database, not in code: write a new rule from the
-      console and it takes effect on the very next event. Rules can be scoped, so one
-      person's custom detection only ever fires on their own machines.</p>
-      <div class="shot-gallery">
-        <div class="shot filled">
-          <img src="../EDR-Project/rules-scope-left-sanitized.png" alt="SentryOS Rules page showing rule status, name, condition, and severity columns">
-          <div class="shot-caption">rules-scope-left-sanitized.png</div>
+        <div class="accordion">
+          <button class="accordion-header" aria-expanded="false">
+            <span>Foundations of Cybersecurity, Google</span>
+            <i class="fa-solid fa-chevron-down"></i>
+          </button>
+          <div class="accordion-panel">
+            <p>
+              First course in the Google Cybersecurity Certificate. Introduces the
+              cybersecurity profession, including entry level analyst responsibilities
+              and core skills, the events that shaped the field, and the CIA triad.
+              Covers the CISSP eight security domains, common security frameworks and
+              controls, security ethics, and the tools cybersecurity analysts use day to day.
+            </p>
+          </div>
         </div>
-        <div class="shot filled">
-          <img src="../EDR-Project/rules-scope-right-sanitized.png" alt="SentryOS Rules page scrolled right, showing the Scope, Created by, and Created columns">
-          <div class="shot-caption">rules-scope-right-sanitized.png</div>
+
+        <div class="accordion">
+          <button class="accordion-header" aria-expanded="false">
+            <span>Microsoft Security Essentials Professional Certificate</span>
+            <i class="fa-solid fa-chevron-down"></i>
+          </button>
+          <div class="accordion-panel">
+            <p>
+              Microsoft and LinkedIn, in progress. Covers the CIA triad and core
+              information security principles, cybersecurity threats including malware,
+              phishing, social engineering, and identity theft, governance risk and
+              compliance, the cloud shared responsibility model, defense in depth, zero
+              trust, identity and access management, Azure security services, Microsoft
+              Security Copilot for incident analysis, and Microsoft's endpoint, data
+              governance, and threat intelligence solutions.
+            </p>
+          </div>
         </div>
-      </div>
-    </div>
+      </section>
 
-    <div class="feature">
-      <h3>Real account boundaries</h3>
-      <p>Every user is scoped to their own set of endpoints, enforced on the server, not
-      just hidden in the UI. A member can write their own rules and never sees, or
-      affects, anyone else's machines.</p>
-      <div class="shot-gallery">
-        <div class="shot filled">
-          <img src="../EDR-Project/multi-tenant-member-sanitized.png" alt="A member account scoped to Personal Scope, seeing only 2 of the fleet's endpoints">
-          <div class="shot-caption">multi-tenant-member-sanitized.png</div>
+      <!-- Additional Certifications & Simulations -->
+      <section class="block" id="additional">
+        <h2 class="accent-a">Additional certifications and simulations</h2>
+        <ul class="simple-list">
+          <li><strong>Intro to Web Development</strong> - CodePath, May 2026</li>
+          <li><strong>AIG, Shields Up: Cybersecurity Job Simulation</strong> - Forage, Dec 2025</li>
+          <li><strong>Deloitte Australia, Cyber Job Simulation</strong> - Forage, Dec 2025</li>
+          <li><strong>Mastercard, Cybersecurity Job Simulation</strong> - Forage, Nov 2025</li>
+        </ul>
+      </section>
+
+      <!-- Contact -->
+      <section class="block" id="contact">
+        <h2 class="accent-b">Contact</h2>
+        <div class="contact-row">
+          <a href="mailto:pdrrubinn@gmail.com"><i class="fa-solid fa-envelope"></i> Email</a>
+          <a href="assets/style/Parker_Rubin_Resume_Sept.pdf?v=3" target="_blank"><i class="fa-solid fa-file-lines"></i> Resume</a>
+          <a href="https://github.com/ParkerRubin" target="_blank"><i class="fa-brands fa-github"></i> GitHub</a>
+          <a href="https://www.linkedin.com/in/parkerrubin" target="_blank"><i class="fa-brands fa-linkedin-in"></i> LinkedIn</a>
         </div>
-        <div class="shot filled">
-          <img src="../EDR-Project/multi-tenant-admin-sanitized.png" alt="Admin account with the scope switcher open, showing every scope and all 7 endpoints">
-          <div class="shot-caption">multi-tenant-admin-sanitized.png</div>
-        </div>
-      </div>
-    </div>
+      </section>
 
-    <div class="feature">
-      <h3>Exceptions</h3>
-      <p>An allowlist that sits above rule matching: a specific file hash or process name
-      can get suppressed without touching the rule that caught it, so one known-good file
-      stops alerting without weakening the rule for everything else it's supposed to
-      catch.</p>
-      <div class="shot filled">
-        <img src="../EDR-Project/exceptions-sanitized.png" alt="SentryOS Exceptions page showing allowlisted hashes and process names">
-        <div class="shot-caption">exceptions-sanitized.png</div>
-      </div>
-    </div>
-
-    <div class="feature">
-      <h3>Settings</h3>
-      <p>The actual admin control surface behind everything above: creating scopes,
-      assigning endpoints to them, adding users with a role and a scope, generating
-      license keys, and publishing the current agent version. This is where "multi-tenant"
-      stops being a design decision and becomes a page someone actually clicks through.</p>
-      <div class="shot filled">
-        <img src="../EDR-Project/settings-sanitized.png" alt="SentryOS Settings page showing scope, user, and license key management">
-        <div class="shot-caption">settings-sanitized.png</div>
-      </div>
-    </div>
-
-    <div class="feature">
-      <h3>Audit log</h3>
-      <p>Who resolved an alert, who created a rule, who added a user, and when, going back
-      as far as the log retains. The kind of thing that turns "I think someone changed
-      that rule" into an actual answer instead of a guess.</p>
-      <div class="shot filled">
-        <img src="../EDR-Project/audit-log-sanitized.png" alt="SentryOS Audit log page showing a history of actions by user and timestamp">
-        <div class="shot-caption">audit-log-sanitized.png</div>
-      </div>
-    </div>
-
-    <div class="feature">
-      <h3>Login and account recovery</h3>
-      <p>Five failed attempts locks an account for fifteen minutes. There's no email
-      service wired up, so instead of a self-serve "forgot password" form, an admin
-      generates a single-use reset link from Settings and sends it directly, solving the
-      same real problem without needing an email pipeline this project doesn't have.</p>
-      <div class="shot-gallery">
-        <div class="shot filled">
-          <img src="../EDR-Project/login-reset-dialog-sanitized.png" alt="Admin confirming generation of a password reset link for a locked-out user in Settings">
-          <div class="shot-caption">login-reset-dialog-sanitized.png</div>
-        </div>
-        <div class="shot filled">
-          <img src="../EDR-Project/login-reset-link-sanitized.png" alt="The generated single-use reset link, ready to send to the user directly">
-          <div class="shot-caption">login-reset-link-sanitized.png</div>
-        </div>
-        <div class="shot filled">
-          <img src="../EDR-Project/login-reset-form-sanitized.png" alt="The user setting a new password from the single-use reset link">
-          <div class="shot-caption">login-reset-form-sanitized.png</div>
-        </div>
-        <div class="shot filled">
-          <img src="../EDR-Project/login-success-sanitized.png" alt="Login page confirming the password was updated successfully">
-          <div class="shot-caption">login-success-sanitized.png</div>
-        </div>
-      </div>
-    </div>
-
-    <div class="feature">
-      <h3>The agent itself</h3>
-      <p>Runs as an actual Windows Service: SYSTEM-level, starts at boot, no logged-in
-      user required. It reads native Windows auditing for process creation, and Sysmon
-      for network connections, cross-process memory access, and file writes.</p>
-      <div class="shot filled">
-        <img src="../EDR-Project/agent-terminal-sanitized.png" alt="agent.exe running in debug mode, terminal output showing a Sysmon event caught and forwarded to the backend">
-        <div class="shot-caption">agent-terminal-sanitized.png</div>
-      </div>
-    </div>
-
-    <div class="feature">
-      <h3>An installer that does the boring parts for you</h3>
-      <p>One double-click: prompts for a license key, silently turns on the Windows
-      auditing settings the agent needs, installs Sysmon with a scoped config, and
-      registers the agent as a service, with no PowerShell and no manual steps.</p>
-      <div class="shot-gallery">
-        <div class="shot filled">
-          <img src="../EDR-Project/installer-wizard-key-sanitized.png" alt="Installer wizard's product activation screen prompting for a license key">
-          <div class="shot-caption">installer-wizard-key-sanitized.png</div>
-        </div>
-        <div class="shot filled">
-          <img src="../EDR-Project/installer-wizard-finish-sanitized.png" alt="Installer wizard's completion screen">
-          <div class="shot-caption">installer-wizard-finish-sanitized.png</div>
-        </div>
-        <div class="shot filled">
-          <img src="../EDR-Project/installer-wizard-files-sanitized.png" alt="Program Files folder after install, showing the agent executable and a Sysmon subfolder installed alongside it">
-          <div class="shot-caption">installer-wizard-files-sanitized.png</div>
-        </div>
-        <div class="shot filled">
-          <img src="../EDR-Project/installer-wizard-running-sanitized.png" alt="Task Manager showing the SentryOS EDR Agent process actually running post-install">
-          <div class="shot-caption">installer-wizard-running-sanitized.png</div>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<section class="on-surface">
-  <div class="wrap">
-    <h2>Where it got interesting</h2>
-    <p class="section-kicker">The bugs and decisions that actually taught me something</p>
-
-    <div class="story">
-      <h3>The agent that was watching itself</h3>
-      <p>
-        After wiring the agent to read Sysmon's network-connection events, I noticed a
-        wall of repeated entries: the same destination, over and over, several times a
-        second. It was the agent's own outbound calls to the backend: Sysmon was logging
-        the agent reporting an event, which was itself a network connection, which the
-        agent then reported. Found it by counting raw event volume live on a test machine
-        and tracing the flood back to a single source process. Fixed with one exclusion
-        rule in the Sysmon config.
-      </p>
-    </div>
-
-    <div class="story">
-      <h3>A fix that quietly never applied, for weeks</h3>
-      <p>
-        Every time I updated the Sysmon detection config and reinstalled, nothing changed.
-        The actual cause: Sysmon refuses to reinstall its configuration over an
-        already-installed copy, and the installer's silent execution swallowed that
-        failure completely, with no error, no warning, just an installer that appeared to
-        succeed while doing nothing. Only surfaced by dumping Sysmon's live configuration
-        directly and noticing it didn't match what I'd just shipped.
-      </p>
-    </div>
-
-    <div class="story">
-      <h3>Losing a detection to a network blip</h3>
-      <p>
-        A transient database disconnect early in the ingestion pipeline could silently
-        drop a real detection before it was ever evaluated. The fix wasn't "retry
-        everything." It was deciding, function by function, what's worth a retry (the
-        actual alert) versus what's safe to log and move past (a timestamp update). Losing
-        the wrong kind of write is a much bigger problem than losing the other.
-      </p>
-    </div>
-
-    <div class="story">
-      <h3>A service that only worked when I restarted it myself</h3>
-      <p>
-        Windows won't retry a service that fails on its first start; it just stays down.
-        Since the very first thing the agent does is activate over the network, any
-        one-off hiccup at that exact moment could permanently kill an unattended install
-        with nobody watching. Fixed at the OS level with a recovery policy, not by telling
-        people to reboot when something seems off.
-      </p>
-    </div>
-
-    <div class="story">
-      <h3>A login screen isn't an account boundary</h3>
-      <p>
-        Early multi-user support trusted a scope selection stored in a cookie, which
-        meant it was trusted, and editable, entirely on the visitor's own machine. Real
-        separation meant re-checking the account's actual permissions on every single
-        request, server-side, and never taking the browser's word for what it's allowed
-        to see.
-      </p>
-    </div>
-  </div>
-</section>
-
-<section>
-  <div class="wrap">
-    <h2>What it doesn't do</h2>
-    <p class="section-kicker">Worth saying plainly, not hiding</p>
-    <ul class="limits">
-      <li><strong>Detection is pattern matching, not behavioral analysis.</strong> A rule
-      checks one field for one condition, while real EDR platforms correlate behavior
-      across an entire process tree over time. Building that properly is enterprise
-      infrastructure one team maintains full-time, not a solo project's first version.</li>
-      <li><strong>Agent updates are notify-only, on purpose.</strong> The agent checks
-      whether it's outdated and says so; it doesn't silently replace its own running
-      binary. A Windows Service quietly overwriting itself is exactly the kind of thing
-      that's easy to get subtly wrong, and a bad version pushed silently could break every
-      install at once with no one watching.</li>
-      <li><strong>No process-tree reasoning yet.</strong> The data to build it exists
-      (parent process is already captured); the graph logic that would make "this is fine
-      normally, suspicious with this parent" possible isn't built yet.</li>
-    </ul>
-  </div>
-</section>
-
-<footer>
-  <div class="wrap">
-    <div class="stack-row">
-      <span class="stack-pill">FastAPI</span>
-      <span class="stack-pill">Supabase / Postgres</span>
-      <span class="stack-pill">Render</span>
-      <span class="stack-pill">Sysmon</span>
-      <span class="stack-pill">Windows Event Log</span>
-      <span class="stack-pill">PyInstaller</span>
-      <span class="stack-pill">Inno Setup</span>
-      <span class="stack-pill">Groq</span>
-    </div>
-  </div>
-</footer>
-
-</body>
+    </main>
+    <script src="assets/js/script.js"></script>
+  </body>
 </html>
