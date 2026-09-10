@@ -8,7 +8,7 @@
     
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="theme-color" content="#faf7f2" />
+    <meta name="theme-color" content="#0A0E14" />
     <meta name="description" content="Using Linux audit logs to attribute simulated attacks to the files they modified." />
     <title>Let's wget This Bread, File Integrity Monitoring with Auditd</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -21,6 +21,27 @@
       rel="stylesheet"
     />
     <link href="../assets/style/style.css" rel="stylesheet" />
+
+    <!--
+      Dark-theme override, same tokens as index.html and blog.html, so
+      this post reads as the same site instead of a light-page holdover.
+      Everything in style.css is built on these :root custom properties.
+    -->
+    <style>
+      :root {
+        --bg: #0A0E14;
+        --surface: #171D2B;
+        --ink: #E7EAF0;
+        --muted: #8891A3;
+        --line: #232B3D;
+        --accent: #8B7CF6;
+        --accent-soft: rgba(139, 124, 246, 0.09);
+        --accent-2: #2DD4BF;
+        --accent-2-soft: rgba(45, 212, 191, 0.14);
+        --accent-3: #F5A34B;
+        --accent-3-soft: rgba(245, 163, 75, 0.07);
+      }
+    </style>
   </head>
   <body>
     <main class="page">
