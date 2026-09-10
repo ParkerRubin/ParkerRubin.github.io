@@ -39,26 +39,27 @@
         --muted: #8891A3;
         --line: #232B3D;
         --accent: #8B7CF6;
-        --accent-soft: rgba(139, 124, 246, 0.16);
+        --accent-soft: rgba(139, 124, 246, 0.09);
         --accent-2: #2DD4BF;
         --accent-2-soft: rgba(45, 212, 191, 0.14);
         --accent-3: #F5A34B;
-        --accent-3-soft: rgba(245, 163, 75, 0.14);
+        --accent-3-soft: rgba(245, 163, 75, 0.07);
       }
 
       /* The hero's ambient glow (radial gradients behind the portrait)
          blended invisibly into the original light background at just
          2px of blur. Against the new dark background, that same box
-         read as a hard-edged rectangle instead of a soft glow, and a
-         larger blur radius alone wasn't a reliable fix: CSS blur spreads
-         visually well past an element's own box (roughly 2x the blur
-         radius), so even with the glow's top pinned to the hero's own
-         top edge, it still bled upward into the tab-nav above. Clipping
-         it to the hero section itself is the actual fix, since it's
-         structurally impossible for a clipped element to bleed past its
-         container's boundary regardless of blur amount. */
+         read as a hard-edged rectangle, and clipping it to the hero
+         (overflow: hidden, to stop it bleeding into the tab-nav above)
+         introduced a new version of the same problem: the glow didn't
+         fully fade to nothing before hitting that clip boundary, so the
+         hero's own box silhouette became visible instead. Padding gives
+         it room to dissipate before the edge, and a lower opacity on
+         the soft tokens above makes any residual edge far less
+         noticeable either way. */
       .hero {
         overflow: hidden;
+        padding: 2.5rem 0 1rem;
       }
       .hero::before {
         top: 0;
