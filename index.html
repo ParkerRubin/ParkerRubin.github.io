@@ -8,7 +8,7 @@
     
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="theme-color" content="#f6f6fb" />
+    <meta name="theme-color" content="#0A0E14" />
     <meta name="description" content="Parker Rubin, Computer Science student focused on cybersecurity and blue team operations." />
     <title>Parker Rubin</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -21,6 +21,31 @@
       rel="stylesheet"
     />
     <link href="assets/style/style.css" rel="stylesheet" />
+
+    <!--
+      Dark-theme override, scoped to this page only. Everything in
+      style.css is built on the :root custom properties below, so
+      redefining just the tokens (rather than rewriting every rule)
+      reskins the whole page consistently. blog.html and the individual
+      posts still use the original light tokens from style.css itself,
+      so there will be a visible split between Profile (dark) and Blog
+      (light) until/unless those get the same treatment.
+    -->
+    <style>
+      :root {
+        --bg: #0A0E14;
+        --surface: #171D2B;
+        --ink: #E7EAF0;
+        --muted: #8891A3;
+        --line: #232B3D;
+        --accent: #8B7CF6;
+        --accent-soft: rgba(139, 124, 246, 0.16);
+        --accent-2: #2DD4BF;
+        --accent-2-soft: rgba(45, 212, 191, 0.14);
+        --accent-3: #F5A34B;
+        --accent-3-soft: rgba(245, 163, 75, 0.14);
+      }
+    </style>
   </head>
   <body>
     <main class="page">
@@ -66,7 +91,7 @@
           </div>
           <i class="fa-solid fa-arrow-up-right"></i>
         </a>
-        
+
         <a class="project-row" href="../EDR-Project/index.html">
           <div class="project-text">
             <h3>SentryOS - building an EDR from the ground up</h3>
@@ -76,6 +101,7 @@
           </div>
           <i class="fa-solid fa-arrow-up-right"></i>
         </a>
+      </section>
 
       <!-- Certifications -->
       <section class="block" id="certifications">
@@ -167,10 +193,10 @@
       <section class="block" id="additional">
         <h2 class="accent-a">Additional certifications and simulations</h2>
         <ul class="simple-list">
-          <li><strong>Intro to Web Development</strong> — CodePath, May 2026</li>
-          <li><strong>AIG, Shields Up: Cybersecurity Job Simulation</strong> — Forage, Dec 2025</li>
-          <li><strong>Deloitte Australia, Cyber Job Simulation</strong> — Forage, Dec 2025</li>
-          <li><strong>Mastercard, Cybersecurity Job Simulation</strong> — Forage, Nov 2025</li>
+          <li><strong>Intro to Web Development</strong> - CodePath, May 2026</li>
+          <li><strong>AIG, Shields Up: Cybersecurity Job Simulation</strong> - Forage, Dec 2025</li>
+          <li><strong>Deloitte Australia, Cyber Job Simulation</strong> - Forage, Dec 2025</li>
+          <li><strong>Mastercard, Cybersecurity Job Simulation</strong> - Forage, Nov 2025</li>
         </ul>
       </section>
 
