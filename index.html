@@ -45,6 +45,15 @@
         --accent-3: #F5A34B;
         --accent-3-soft: rgba(245, 163, 75, 0.14);
       }
+
+      /* The hero's ambient glow (radial gradients behind the portrait)
+         blended invisibly into the original light background at just
+         2px of blur. Against the new dark background, that same box
+         read as a hard-edged rectangle instead of a soft glow. A much
+         larger blur radius feathers it out properly. */
+      .hero::before {
+        filter: blur(70px);
+      }
     </style>
   </head>
   <body>
