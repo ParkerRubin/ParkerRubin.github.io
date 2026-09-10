@@ -289,6 +289,9 @@
     padding:0;
     overflow:hidden;
   }
+  .shot.filled img{
+    cursor: zoom-in;
+  }
   .shot-caption{
     padding:12px 16px;
     font-family:"IBM Plex Mono", monospace;
@@ -299,6 +302,34 @@
     display:flex;
     flex-direction:column;
     gap:16px;
+  }
+
+  /* ---------- Lightbox (click-to-zoom on real screenshots) ---------- */
+  .lightbox-overlay{
+    position: fixed;
+    inset: 0;
+    background: rgba(6, 8, 12, 0.92);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+    z-index: 999;
+    cursor: zoom-out;
+    animation: lightbox-fade-in 0.15s ease;
+  }
+  .lightbox-overlay img{
+    max-width: 100%;
+    max-height: 100%;
+    border-radius: 8px;
+    border: 1px solid var(--line);
+    cursor: zoom-out;
+  }
+  @keyframes lightbox-fade-in{
+    from{ opacity: 0; }
+    to{ opacity: 1; }
+  }
+  @media (prefers-reduced-motion: reduce){
+    .lightbox-overlay{ animation: none; }
   }
 
   /* ---------- Infra callout (mid feature-tour pause) ---------- */
@@ -645,9 +676,23 @@
       service wired up, so instead of a self-serve "forgot password" form, an admin
       generates a single-use reset link from Settings and sends it directly, solving the
       same real problem without needing an email pipeline this project doesn't have.</p>
-      <div class="shot filled">
-        <img src="../EDR-Project/login-sanitized.png" alt="SentryOS login page, including the lockout message after repeated failed attempts">
-        <div class="shot-caption">login-sanitized.png</div>
+      <div class="shot-gallery">
+        <div class="shot filled">
+          <img src="../EDR-Project/login-reset-dialog-sanitized.png" alt="Admin confirming generation of a password reset link for a locked-out user in Settings">
+          <div class="shot-caption">login-reset-dialog-sanitized.png</div>
+        </div>
+        <div class="shot filled">
+          <img src="../EDR-Project/login-reset-link-sanitized.png" alt="The generated single-use reset link, ready to send to the user directly">
+          <div class="shot-caption">login-reset-link-sanitized.png</div>
+        </div>
+        <div class="shot filled">
+          <img src="../EDR-Project/login-reset-form-sanitized.png" alt="The user setting a new password from the single-use reset link">
+          <div class="shot-caption">login-reset-form-sanitized.png</div>
+        </div>
+        <div class="shot filled">
+          <img src="../EDR-Project/login-success-sanitized.png" alt="Login page confirming the password was updated successfully">
+          <div class="shot-caption">login-success-sanitized.png</div>
+        </div>
       </div>
     </div>
 
@@ -789,6 +834,40 @@
     </div>
   </div>
 </footer>
+
+<script>
+  // Click-to-zoom lightbox for the real screenshots (mirrors the same
+  // pattern used on the other blog posts) - only targets actual photos
+  // (.shot.filled img), not the hero's mock alert card, since that's
+  // built from plain HTML/CSS, not an <img>.
+  document.querySelectorAll(".shot.filled img").forEach((img) => {
+    img.addEventListener("click", () => {
+      const overlay = document.createElement("div");
+      overlay.className = "lightbox-overlay";
+
+      const full = document.createElement("img");
+      full.src = img.src;
+      full.alt = img.alt;
+
+      overlay.appendChild(full);
+      document.body.appendChild(overlay);
+      document.body.style.overflow = "hidden";
+
+      const close = () => {
+        overlay.remove();
+        document.body.style.overflow = "";
+      };
+
+      overlay.addEventListener("click", close);
+      document.addEventListener("keydown", function onKey(e) {
+        if (e.key === "Escape") {
+          close();
+          document.removeEventListener("keydown", onKey);
+        }
+      });
+    });
+  });
+</script>
 
 </body>
 </html>
