@@ -34,14 +34,49 @@
         --accent-3: #F5A34B;
         --accent-3-soft: rgba(245, 163, 75, 0.07);
       }
-      /* Page-only additions: code blocks, captions, photo grid */
+
+      /* Page-only additions: figures, captions, collage, code blocks */
+      .post-body figure { margin: 1rem 0 1.75rem; }
+      .post-body figure img,
+      .post-body figure video {
+        width: 100%;
+        height: auto;
+        border-radius: 10px;
+        display: block;
+        background: var(--surface);
+      }
+      .post-body figure.tall { max-width: 460px; margin-left: auto; margin-right: auto; }
+      .post-body figcaption {
+        color: var(--muted);
+        font-size: 0.85rem;
+        line-height: 1.5;
+        margin-top: 0.5rem;
+      }
+      .post-body .collage {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0.5rem;
+      }
+      .post-body .shots {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 0.75rem;
+        margin: 1rem 0 1.75rem;
+      }
+      .post-body .shots figure { margin: 0; }
+      .post-body .shots img { border-radius: 8px; }
+      .post-body .shots figcaption { font-size: 0.8rem; margin-top: 0.35rem; }
+      @media (max-width: 520px) {
+        .post-body .collage,
+        .post-body .shots { grid-template-columns: 1fr; }
+      }
       .post-body pre {
         background: var(--surface);
         border: 1px solid var(--line);
         border-radius: 8px;
         padding: 1rem;
         overflow-x: auto;
-        margin: 0.75rem 0 1.5rem;
+        margin: 0.75rem 0 1.75rem;
         line-height: 1.5;
       }
       .post-body pre code {
@@ -50,40 +85,16 @@
         padding: 0;
         font-size: 0.8rem;
       }
-      .post-body .cap {
-        color: var(--muted);
-        font-size: 0.85rem;
-        margin: -0.75rem 0 1.5rem;
-      }
-      .post-body .shots {
-        display: grid;
-        grid-template-columns: repeat(2, 1fr);
-        gap: 0.75rem;
-        margin: 1rem 0 1.5rem;
-      }
-      @media (max-width: 520px) { .post-body .shots { grid-template-columns: 1fr; } }
-      .post-body .shots figure { margin: 0; }
-      .post-body .shots img { width: 100%; border-radius: 8px; display: block; }
-      .post-body .collage {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 0.5rem;
-        margin-bottom: 0.75rem;
-      }
-      .post-body .collage img { width: 100%; border-radius: 10px; display: block; }
-      .post-body .shots figcaption { color: var(--muted); font-size: 0.8rem; margin-top: 0.35rem; }
     </style>
   </head>
   <body>
 
     <!--
       Media files, all in competitions/:
-        shellhacks-front.jpg  shellhacks-topdown.jpg
-        shellhacks-beta.mp4   shellhacks-final.mp4
-        shellhacks-gesture1.jpg  shellhacks-gesture2.jpg
-        shellhacks-blackstone1.jpg  shellhacks-blackstone2.jpg
-        shellhacks-club.jpg  shellhacks-clubfriend.jpg
-        shellhacks-team.jpg  shellhacks-me.jpg
+        shellhacks-team.jpg  shellhacks-me.jpg  shellhacks-front.jpg  shellhacks-topdown.jpg
+        shellhacks-beta.mp4  shellhacks-beta-poster.jpg  shellhacks-final.mp4  shellhacks-final-poster.jpg
+        shellhacks-gesture1.jpg  shellhacks-gesture2.jpg  shellhacks-blackstone1.jpg  shellhacks-blackstone2.jpg
+        shellhacks-club.jpg  shellhacks-clubfriend.jpg  shellhacks-fiu.jpg
     -->
 
     <main class="page">
@@ -100,23 +111,16 @@
       <p class="post-date">ShellHacks 2026, Florida International University</p>
 
       <div class="post-body">
-        <div class="collage">
-          <img src="../competitions/shellhacks-team.jpg" alt="The JARVIS team in front of the ShellHacks wall" />
-          <img src="../competitions/shellhacks-me.jpg" alt="Parker at the ShellHacks wall" />
-        </div>
-        <p class="cap" style="margin-top: 0;">
-          The team, plus one of me at the wall. Big thanks to my teammates for a weekend of
-          building, breaking, and fixing things together. Really happy to have been here.
-        </p>
-
-        <img src="../competitions/shellhacks-front.jpg" alt="JARVIS on the table: a webcam on a servo head, an Arduino, and the laptop showing the tracking view" style="width: 100%; border-radius: 10px; margin-bottom: 1.5rem;" />
-        <p class="cap">
-          JARVIS mid-demo. The webcam sits on the servo on top of the tower, the Arduino is
-          wired in below it, and the laptop shows what it sees: a green TRACKING box on the
-          person in front of it, a blue skeleton over his hand, and nothing on the guy walking
-          past in the background. The status line says "Steadying the head (lag 450 ms)", which
-          is the servo compensating for the camera delay.
-        </p>
+        <figure>
+          <div class="collage">
+            <img src="../competitions/shellhacks-team.jpg" width="1400" height="1050" alt="The JARVIS team in front of the ShellHacks wall" />
+            <img src="../competitions/shellhacks-me.jpg" width="1400" height="1050" alt="Parker at the ShellHacks wall" />
+          </div>
+          <figcaption>
+            The team, plus one of me at the wall. Big thanks to my teammates for a weekend of
+            building, breaking, and fixing things together. Really happy to have been here.
+          </figcaption>
+        </figure>
 
         <p>
           ShellHacks is Florida's largest hackathon, a weekend at FIU of building something
@@ -139,14 +143,31 @@
           <li>Stay quietly aware of who's in front of it, and in proactive mode, speak up on its own when something is actually worth mentioning</li>
         </ul>
 
-        <img src="../competitions/shellhacks-topdown.jpg" alt="The full JARVIS table at ShellHacks 2026" style="width: 100%; border-radius: 10px; margin: 1rem 0 1.5rem;" />
-        <p class="cap">
-          The table. The tower is paint stir sticks and zip ties, with the webcam and servo on
-          top of a couple of small boxes. Behind it is a trifold with my resume and a Blackstone
-          careers flyer, and the Surface laptop running everything is off to the side.
+        <p>
+          Here it is mid-demo. The webcam sits on the servo at the top of the tower with the
+          Arduino wired in next to it, and the laptop shows what JARVIS sees: a green TRACKING
+          box on the person in front of it, a blue skeleton over his hand from the gesture
+          model, and no box at all on the guy walking past in the background. The status line
+          at the bottom reads "Steadying the head (lag 450 ms)", the servo compensating for how
+          late the camera image arrives.
         </p>
+        <figure class="tall">
+          <img src="../competitions/shellhacks-front.jpg" width="1050" height="1400" loading="lazy" decoding="async" alt="JARVIS on the table: a webcam on a servo head, an Arduino, and the laptop showing the tracking view" />
+          <figcaption>JARVIS tracking one face and one hand, ignoring the room behind it.</figcaption>
+        </figure>
 
         <h3>How it's built</h3>
+        <p>
+          The hardware is about as scrappy as it gets. The tower is paint stir sticks and zip
+          ties, the servo and webcam sit on a couple of small boxes on top, and the Surface
+          laptop off to the side runs everything. Behind it was a trifold with my resume and a
+          Blackstone careers flyer.
+        </p>
+        <figure>
+          <img src="../competitions/shellhacks-topdown.jpg" width="1400" height="1050" loading="lazy" decoding="async" alt="The full JARVIS table at ShellHacks 2026" />
+          <figcaption>The table at ShellHacks.</figcaption>
+        </figure>
+        <p>The software is where most of the work went:</p>
         <table>
           <thead>
             <tr><th>Piece</th><th>What it does</th></tr>
@@ -185,7 +206,7 @@ def look(p):
           <strong>Picking one face out of a crowd.</strong> YuNet finds every face in the frame,
           which at a hackathon is a lot of faces. JARVIS keeps only the ones that are big enough
           and at least 60% the size of the biggest face, so people walking by in the back get
-          dropped. That's why the person walking past in the top photo has no box.
+          dropped. That's why the person walking past in the demo photo has no box.
         </p>
 <pre><code>big = out[0][3]   # height of the largest face
 out = [b for b in out if b[3] >= FACE_MIN and b[3] >= big * 0.6]</code></pre>
@@ -231,19 +252,25 @@ out = [b for b in out if b[3] >= FACE_MIN and b[3] >= big * 0.6]</code></pre>
           from before the tracking was dialed in. Watch the head overshoot, swing past the person
           in front of it, and swing back, with the whole frame smearing from motion blur.
         </p>
-        <video src="../competitions/shellhacks-beta.mp4" controls muted playsinline loop preload="metadata" style="width: 100%; border-radius: 10px; margin: 1rem 0 1.5rem;"></video>
+        <figure>
+          <video src="../competitions/shellhacks-beta.mp4" poster="../competitions/shellhacks-beta-poster.jpg" width="640" height="480" controls muted playsinline loop preload="none"></video>
+          <figcaption>Before: overshoot and hunting.</figcaption>
+        </figure>
         <p>
           The second is the finished version. The person stays centered while the room
           slides past behind them, no overshoot, no hunting back and forth.
         </p>
-        <video src="../competitions/shellhacks-final.mp4" controls muted playsinline loop preload="metadata" style="width: 100%; border-radius: 10px; margin: 1rem 0 1.5rem;"></video>
+        <figure>
+          <video src="../competitions/shellhacks-final.mp4" poster="../competitions/shellhacks-final-poster.jpg" width="640" height="480" controls muted playsinline loop preload="none"></video>
+          <figcaption>After: a smooth follow.</figcaption>
+        </figure>
         <p>
           The difference came from one idea: stop assuming, and measure. On startup JARVIS
-          nudges the head 8 degrees and watches where my face moves in the image. That tells
+          nudges the head 8 degrees and watches where the face moves in the image. That tells
           it which way the servo is mounted, and how long the camera takes to show the move,
           which is the delay it has to lead by.
         </p>
-<pre><code>ok = (d &gt; 0) == (PAN_DIR &gt; 0)   # did my face move the way the model expects?
+<pre><code>ok = (d &gt; 0) == (PAN_DIR &gt; 0)   # did the face move the way the model expects?
 if not ok: PAN_DIR = -PAN_DIR    # servo is mounted the other way, flip it</code></pre>
 
         <h3>What broke, and what I learned from it</h3>
@@ -265,13 +292,14 @@ if not ok: PAN_DIR = -PAN_DIR    # servo is mounted the other way, flip it</code
         <p>
           <strong>The head ran away.</strong> At one point the camera swung all the way to one
           side and stared at the ceiling. The servo was mounted the opposite way from what the
-          code assumed, so every correction pushed me further off center. The startup nudge
-          above is the fix.
+          code assumed, so every correction pushed the target further off center. The startup
+          nudge above is the fix.
         </p>
         <p>
           <strong>It wobbled.</strong> That's the first clip. The webcam image was arriving
-          later than I'd assumed, so it kept reacting to where I was a moment ago. Measuring
-          the delay and slowing the servo down with a gentle ramp got it to the second clip.
+          later than I'd assumed, so it kept reacting to where the person was a moment ago.
+          Measuring the delay and slowing the servo down with a gentle ramp got it to the
+          second clip.
         </p>
         <p>
           <strong>It chased strangers.</strong> In a room full of hackers, the tracker kept
@@ -300,19 +328,19 @@ if not ok: PAN_DIR = -PAN_DIR    # servo is mounted the other way, flip it</code
         </p>
         <div class="shots">
           <figure>
-            <img src="../competitions/shellhacks-gesture1.jpg" alt="Visitor giving JARVIS a thumbs up to trigger a photo" />
+            <img src="../competitions/shellhacks-gesture1.jpg" width="640" height="480" loading="lazy" decoding="async" alt="Visitor giving JARVIS a thumbs up to trigger a photo" />
             <figcaption>A thumbs up to the camera, and JARVIS counts down and takes the shot</figcaption>
           </figure>
           <figure>
-            <img src="../competitions/shellhacks-gesture2.jpg" alt="Talking through JARVIS with a visitor at the table" />
+            <img src="../competitions/shellhacks-gesture2.jpg" width="640" height="480" loading="lazy" decoding="async" alt="Talking through JARVIS with a visitor at the table" />
             <figcaption>Walking a visitor through how it works</figcaption>
           </figure>
           <figure>
-            <img src="../competitions/shellhacks-blackstone1.jpg" alt="With a Blackstone official at ShellHacks 2026" />
+            <img src="../competitions/shellhacks-blackstone1.jpg" width="640" height="480" loading="lazy" decoding="async" alt="A Blackstone official at the JARVIS table" />
             <figcaption>One of the Blackstone team</figcaption>
           </figure>
           <figure>
-            <img src="../competitions/shellhacks-blackstone2.jpg" alt="With a second Blackstone official at ShellHacks 2026" />
+            <img src="../competitions/shellhacks-blackstone2.jpg" width="640" height="480" loading="lazy" decoding="async" alt="A second Blackstone official at the JARVIS table" />
             <figcaption>And the second from Blackstone</figcaption>
           </figure>
         </div>
@@ -322,11 +350,11 @@ if not ok: PAN_DIR = -PAN_DIR    # servo is mounted the other way, flip it</code
         </p>
         <div class="shots">
           <figure>
-            <img src="../competitions/shellhacks-club.jpg" alt="The team, photographed by JARVIS" />
+            <img src="../competitions/shellhacks-club.jpg" width="640" height="480" loading="lazy" decoding="async" alt="The team, photographed by JARVIS" />
             <figcaption>The team again, this time shot by JARVIS</figcaption>
           </figure>
           <figure>
-            <img src="../competitions/shellhacks-clubfriend.jpg" alt="A friend from the club giving two thumbs up to JARVIS" />
+            <img src="../competitions/shellhacks-clubfriend.jpg" width="640" height="480" loading="lazy" decoding="async" alt="A friend from the club giving two thumbs up to JARVIS" />
             <figcaption>Two thumbs up, one photo</figcaption>
           </figure>
         </div>
@@ -338,9 +366,17 @@ if not ok: PAN_DIR = -PAN_DIR    # servo is mounted the other way, flip it</code
           faster, but the part I'm proudest of is the debugging: figuring out why a servo runs
           away, why a camera lies about timing, and how to make an assistant useful without
           letting it talk over you. The code is on
-          <a href="https://github.com/ParkerRubin/ShellHacks">GitHub</a>. Thanks to the
-          ShellHacks organizers and every sponsor who stopped by the table.
+          <a href="https://github.com/ParkerRubin/ShellHacks">GitHub</a>.
         </p>
+        <p>
+          Walking out at night, with the FIU sign lit up blue against the dark, it hit me how much fun
+          the whole weekend was. Tired, a little sleep deprived, and really glad I was there.
+          Thanks to the ShellHacks organizers and every sponsor who stopped by the table.
+        </p>
+        <figure class="tall">
+          <img src="../competitions/shellhacks-fiu.jpg" width="1050" height="1400" loading="lazy" decoding="async" alt="The FIU sign lit up blue on a campus building at night" />
+          <figcaption>FIU at night, on the way out.</figcaption>
+        </figure>
       </div>
 
     </main>
