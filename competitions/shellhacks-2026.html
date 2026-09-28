@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#0A0E14" />
+    <meta name="description" content="Building JARVIS at ShellHacks 2026: a voice-controlled desk robot that sees, follows you with a servo head, and acts on your computer." />
+    <title>ShellHacks 2026</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+      rel="stylesheet"
+    />
+    <link href="../assets/style/style.css" rel="stylesheet" />
+    <link rel="icon" type="image/svg+xml" href="../icon/favicon.svg" />
+    <link rel="icon" type="image/png" sizes="32x32" href="../icon/favicon-32.png" />
+    <link rel="apple-touch-icon" href="../icon/apple-touch-icon.png" />
+
+    <!--
+      Dark-theme override, same tokens as the rest of the site, so this
+      post reads as the same site instead of a light-page holdover.
+      Everything in style.css is built on these :root custom properties.
+    -->
+    <style>
+      :root {
+        --bg: #0A0E14;
+        --surface: #171D2B;
+        --ink: #E7EAF0;
+        --muted: #8891A3;
+        --line: #232B3D;
+        --accent: #8B7CF6;
+        --accent-soft: rgba(139, 124, 246, 0.09);
+        --accent-2: #2DD4BF;
+        --accent-2-soft: rgba(45, 212, 191, 0.14);
+        --accent-3: #F5A34B;
+        --accent-3-soft: rgba(245, 163, 75, 0.07);
+      }
+    </style>
+  </head>
+  <body>
+
+    <!--
+      ============================================================
+      PHOTO / VIDEO SLOTS (drop the file into competitions/ with
+      the exact name and it shows up on refresh)
+
+        shellhacks-front.jpg      front angle of JARVIS (top of page)
+        shellhacks-topdown.jpg    top-down shot of the build
+        shellhacks-demo.mp4       early demo video, before it was finalized
+        shellhacks-waymo.jpg      photo with the Waymo sponsor
+        shellhacks-blackstone.jpg photo with the two Blackstone officials
+        shellhacks-club.jpg       photo with a friend from the club
+
+      If a photo is a .png instead of .jpg, either rename the
+      extension here or convert the file, the names must match.
+      Phone videos that come out as .mov should be converted to .mp4
+      so they play in every browser, not just Safari.
+      ============================================================
+    -->
+
+    <main class="page">
+
+      <a class="back-link" href="../blog.html"><i class="fa-solid fa-arrow-left"></i> Back to blog</a>
+
+      <div class="post-tags">
+        <span class="tag tag-forensics">Competition</span>
+        <span class="tag tag-network">Hackathon</span>
+      </div>
+      <h1 class="name" style="font-size: 1.8rem; text-align: left; animation: none; opacity: 1; transform: none;">
+        ShellHacks 2026
+      </h1>
+      <p class="post-date">ShellHacks 2026, Florida International University</p>
+
+      <div class="post-body">
+        <img src="../competitions/shellhacks-front.jpg" alt="JARVIS, the desk robot, seen from the front with its webcam mounted on a servo head" style="width: 100%; border-radius: 10px; margin-bottom: 1.5rem;" />
+
+        <p>
+          ShellHacks is Florida's largest hackathon, a weekend at FIU of building something
+          from nothing and demoing it to judges and sponsors on Sunday. I went in planning to
+          build an AI voice clone detector, pivoted partway through the weekend, and came out
+          with JARVIS: a desk robot you talk to that can see through its camera, turn to follow
+          you, and actually do things on your computer when you ask.
+        </p>
+
+        <h3>What JARVIS does</h3>
+        <p>
+          Most AI assistants live in a chat window and have no idea what's happening in the
+          room. JARVIS sits on the desk instead. You talk to it out loud, and it can:
+        </p>
+        <ul>
+          <li>See what you're holding and answer questions about it, read labels, or read what's on your screen</li>
+          <li>Follow your face with a servo head, or lock onto any object you point it at and keep that in view</li>
+          <li>React to hand gestures: thumbs up takes a photo on a 3, 2, 1 countdown, a peace sign starts and stops recording, an open palm mutes the mic</li>
+          <li>Take photos, record video, zoom in on details, copy text it reads to the clipboard, run web searches, and write up a report of the whole session</li>
+          <li>Stay quietly aware of who's in front of it, and in proactive mode, speak up on its own when something is actually worth mentioning</li>
+        </ul>
+
+        <img src="../competitions/shellhacks-topdown.jpg" alt="Top-down view of the JARVIS build: webcam on a pan servo, Arduino, and wiring" style="width: 100%; border-radius: 10px; margin: 1rem 0 1.5rem;" />
+
+        <h3>How it's built</h3>
+        <table>
+          <thead>
+            <tr><th>Piece</th><th>What it does</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>ElevenLabs Conversational AI</td><td>The voice. Every capability is a tool the agent decides to call on its own, 19 in total</td></tr>
+            <tr><td>Gemini</td><td>The eyes: answers questions about the camera and screen, finds objects by name, reads text</td></tr>
+            <tr><td>OpenCV + OpenCV Zoo</td><td>Local models for faces (YuNet), hands and gestures (MediaPipe), and object tracking (VitTrack), no API calls</td></tr>
+            <tr><td>Arduino + servo</td><td>The head. Python sends angles over serial, the Arduino glides the servo there smoothly</td></tr>
+            <tr><td>Python</td><td>Ties it together, with a live camera window, a control bar, keyboard shortcuts, and live captions</td></tr>
+          </tbody>
+        </table>
+
+        <h3>An early demo</h3>
+        <p>
+          This was recorded before everything was dialed in, but it shows the idea: talking
+          to it, the head turning to follow, and the gesture controls working.
+        </p>
+        <video src="../competitions/shellhacks-demo.mp4" controls muted playsinline preload="metadata" style="width: 100%; border-radius: 10px; margin: 1rem 0 1.5rem;"></video>
+
+        <h3>What broke, and what I learned from it</h3>
+        <p>
+          Most of the weekend wasn't writing features, it was finding out why the real
+          hardware didn't behave like the plan.
+        </p>
+        <p>
+          <strong>It said the word instead of doing the thing.</strong> The first time I
+          asked what it could see, the agent just said "look" out loud. The tool existed but
+          was never properly attached to the agent, so the model treated it as a word. I ended
+          up scripting the entire agent setup so that couldn't drift again.
+        </p>
+        <p>
+          <strong>It talked to itself.</strong> The mic picked up JARVIS's own voice from the
+          speakers, so it kept answering itself in a loop. Muting the mic while it speaks,
+          plus a mute toggle, fixed it.
+        </p>
+        <p>
+          <strong>The head ran away.</strong> At one point the camera swung all the way to one
+          side and stared at the ceiling. The servo was mounted the opposite way from what the
+          code assumed, so every correction pushed me further off center. Instead of guessing,
+          JARVIS now nudges its head 8 degrees on startup, watches which way my face moves in
+          the image, and learns the direction for itself.
+        </p>
+        <p>
+          <strong>It wobbled.</strong> Once tracking worked, the head overshot and corrected
+          back and forth. The webcam image was arriving later than I'd assumed, so it kept
+          reacting to where I was a moment ago. The same startup nudge now also measures that
+          delay, and the controller accounts for it. I also slowed the servo down and gave it
+          a gentle ramp so turns look smooth instead of twitchy.
+        </p>
+        <p>
+          <strong>It chased strangers.</strong> In a room full of hackers, the tracker kept
+          jumping to people walking behind me. It now locks onto one main person, ignores
+          small faces in the background, and holds the lock if I briefly turn away.
+        </p>
+        <p>
+          <strong>It ran out of eyes.</strong> The free Gemini tier allowed about 20 requests a
+          day, and my background awareness loop burned through that fast. That pushed me to
+          move everything I could onto local models, and to only call the cloud when a
+          question actually needs it.
+        </p>
+
+        <div class="callout">
+          The biggest lesson of the weekend: the gap between "it works in my head" and "it
+          works on the table" is where all the real engineering happened. Every fix that
+          mattered came from watching the hardware misbehave and measuring why.
+        </div>
+
+        <h3>The people</h3>
+        <p>
+          JARVIS could take its own photos, so it ended up in a few of them. I got to show it
+          to Waymo and to two people from Blackstone, and it was a good reminder that a
+          working demo starts better conversations than any pitch does.
+        </p>
+        <!-- Add names below if you want them on the page -->
+        <img src="../competitions/shellhacks-waymo.jpg" alt="Demoing JARVIS with a Waymo sponsor at ShellHacks 2026" style="width: 100%; max-width: 500px; border-radius: 10px; margin: 1rem 0 1.5rem;" />
+        <img src="../competitions/shellhacks-blackstone.jpg" alt="Demoing JARVIS with two Blackstone officials at ShellHacks 2026" style="width: 100%; max-width: 500px; border-radius: 10px; margin: 1rem 0 1.5rem;" />
+        <p>
+          And a friend from the FAU Cybersecurity Club stopped by to check it out too.
+        </p>
+        <img src="../competitions/shellhacks-club.jpg" alt="With a friend from the FAU Cybersecurity Club at ShellHacks 2026" style="width: 100%; max-width: 500px; border-radius: 10px; margin: 1rem 0 1.5rem;" />
+
+        <h3>Key takeaway</h3>
+        <p>
+          I came in as a security person and left having built a robot, a voice agent, and a
+          computer vision pipeline in one weekend. I used Claude as a coding partner to move
+          faster, but the part I'm proudest of is the debugging: figuring out why a servo runs
+          away, why a camera lies about timing, and how to make an assistant useful without
+          letting it talk over you. The code is on
+          <a href="https://github.com/ParkerRubin/ShellHacks">GitHub</a>. Thanks to the
+          ShellHacks organizers and every sponsor who stopped by the table.
+        </p>
+      </div>
+
+    </main>
+    <script src="../assets/js/script.js"></script>
+  </body>
+</html>
