@@ -35,7 +35,21 @@
         --accent-3-soft: rgba(245, 163, 75, 0.07);
       }
 
-      /* Page-only additions: figures, captions, collage, code blocks */
+      /* Page-only additions: links, figures, captions, collage, code blocks */
+      .post-body a { color: var(--accent); }
+      .post-body a:hover { text-decoration: underline; }
+      .post-body .repo-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.55rem 1rem;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: var(--surface);
+        color: var(--ink);
+        font-weight: 500;
+      }
+      .post-body .repo-link:hover { border-color: var(--accent); text-decoration: none; }
       .post-body figure { margin: 1rem 0 1.75rem; }
       .post-body figure img,
       .post-body figure video {
@@ -129,6 +143,9 @@
           with JARVIS: a desk robot you talk to that can see through its camera, turn to follow
           you, and actually do things on your computer when you ask.
         </p>
+        <p style="margin: 1rem 0 1.5rem;">
+          <a class="repo-link" href="https://github.com/ParkerRubin/ShellHacks" target="_blank" rel="noopener"><i class="fa-brands fa-github"></i> View the code on GitHub</a>
+        </p>
 
         <h3>What JARVIS does</h3>
         <p>
@@ -182,6 +199,10 @@
         </table>
 
         <h3>How it works</h3>
+        <p>
+          Every snippet below is trimmed from the real code in the
+          <a href="https://github.com/ParkerRubin/ShellHacks" target="_blank" rel="noopener">JARVIS repo</a>.
+        </p>
         <p>
           <strong>Talking turns into actions.</strong> Every Python function JARVIS can run is
           wrapped with one decorator. It registers the function by name, logs the call, and
@@ -366,7 +387,7 @@ if not ok: PAN_DIR = -PAN_DIR    # servo is mounted the other way, flip it</code
           faster, but the part I'm proudest of is the debugging: figuring out why a servo runs
           away, why a camera lies about timing, and how to make an assistant useful without
           letting it talk over you. The code is on
-          <a href="https://github.com/ParkerRubin/ShellHacks">GitHub</a>.
+          <a href="https://github.com/ParkerRubin/ShellHacks" target="_blank" rel="noopener">GitHub</a>.
         </p>
         <p>
           Walking out at night, with the FIU sign lit up blue against the dark, it hit me how much fun
@@ -377,6 +398,10 @@ if not ok: PAN_DIR = -PAN_DIR    # servo is mounted the other way, flip it</code
           <img src="../competitions/shellhacks-fiu.jpg" width="1050" height="1400" loading="lazy" decoding="async" alt="The FIU sign lit up blue on a campus building at night" />
           <figcaption>FIU at night, on the way out.</figcaption>
         </figure>
+
+        <p style="margin: 1rem 0 1.5rem;">
+          <a class="repo-link" href="https://github.com/ParkerRubin/ShellHacks" target="_blank" rel="noopener"><i class="fa-brands fa-github"></i> View the repo on GitHub</a>
+        </p>
       </div>
 
     </main>
