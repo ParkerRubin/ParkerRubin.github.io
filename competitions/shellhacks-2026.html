@@ -64,6 +64,13 @@
       @media (max-width: 520px) { .post-body .shots { grid-template-columns: 1fr; } }
       .post-body .shots figure { margin: 0; }
       .post-body .shots img { width: 100%; border-radius: 8px; display: block; }
+      .post-body .collage {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0.5rem;
+        margin-bottom: 0.75rem;
+      }
+      .post-body .collage img { width: 100%; border-radius: 10px; display: block; }
       .post-body .shots figcaption { color: var(--muted); font-size: 0.8rem; margin-top: 0.35rem; }
     </style>
   </head>
@@ -76,6 +83,7 @@
         shellhacks-gesture1.jpg  shellhacks-gesture2.jpg
         shellhacks-blackstone1.jpg  shellhacks-blackstone2.jpg
         shellhacks-club.jpg  shellhacks-clubfriend.jpg
+        shellhacks-team.jpg  shellhacks-me.jpg
     -->
 
     <main class="page">
@@ -92,6 +100,15 @@
       <p class="post-date">ShellHacks 2026, Florida International University</p>
 
       <div class="post-body">
+        <div class="collage">
+          <img src="../competitions/shellhacks-team.jpg" alt="The JARVIS team in front of the ShellHacks wall" />
+          <img src="../competitions/shellhacks-me.jpg" alt="Parker at the ShellHacks wall" />
+        </div>
+        <p class="cap" style="margin-top: 0;">
+          The team, plus one of me at the wall. Big thanks to my teammates for a weekend of
+          building, breaking, and fixing things together. Really happy to have been here.
+        </p>
+
         <img src="../competitions/shellhacks-front.jpg" alt="JARVIS on the table: a webcam on a servo head, an Arduino, and the laptop showing the tracking view" style="width: 100%; border-radius: 10px; margin-bottom: 1.5rem;" />
         <p class="cap">
           JARVIS mid-demo. The webcam sits on the servo on top of the tower, the Arduino is
@@ -211,13 +228,13 @@ out = [b for b in out if b[3] >= FACE_MIN and b[3] >= big * 0.6]</code></pre>
         <h3>Before and after</h3>
         <p>
           Both clips were recorded by JARVIS itself, from the camera on its head. The first is
-          from before the tracking was dialed in. Watch the head overshoot, swing past me, and
-          swing back, with the whole frame smearing from motion blur.
+          from before the tracking was dialed in. Watch the head overshoot, swing past the person
+          in front of it, and swing back, with the whole frame smearing from motion blur.
         </p>
         <video src="../competitions/shellhacks-beta.mp4" controls muted playsinline loop preload="metadata" style="width: 100%; border-radius: 10px; margin: 1rem 0 1.5rem;"></video>
         <p>
-          The second is the finished version. My friend stay centered while the room slides past
-          behind him, no overshoot, no hunting back and forth.
+          The second is the finished version. The person stays centered while the room
+          slides past behind them, no overshoot, no hunting back and forth.
         </p>
         <video src="../competitions/shellhacks-final.mp4" controls muted playsinline loop preload="metadata" style="width: 100%; border-radius: 10px; margin: 1rem 0 1.5rem;"></video>
         <p>
@@ -292,7 +309,7 @@ if not ok: PAN_DIR = -PAN_DIR    # servo is mounted the other way, flip it</code
           </figure>
           <figure>
             <img src="../competitions/shellhacks-blackstone1.jpg" alt="With a Blackstone official at ShellHacks 2026" />
-            <figcaption>With one of the Blackstone team</figcaption>
+            <figcaption>One of the Blackstone team</figcaption>
           </figure>
           <figure>
             <img src="../competitions/shellhacks-blackstone2.jpg" alt="With a second Blackstone official at ShellHacks 2026" />
@@ -300,12 +317,13 @@ if not ok: PAN_DIR = -PAN_DIR    # servo is mounted the other way, flip it</code
           </figure>
         </div>
         <p>
-          And some friends from the FAU Cybersecurity Club stopped by to check it out too.
+          A friend from the FAU Cybersecurity Club stopped by to check it out too, and the team
+          got in front of it one more time.
         </p>
         <div class="shots">
           <figure>
-            <img src="../competitions/shellhacks-club.jpg" alt="Parker with two friends from the club at ShellHacks 2026" />
-            <figcaption>The club crew</figcaption>
+            <img src="../competitions/shellhacks-club.jpg" alt="The team, photographed by JARVIS" />
+            <figcaption>The team again, this time shot by JARVIS</figcaption>
           </figure>
           <figure>
             <img src="../competitions/shellhacks-clubfriend.jpg" alt="A friend from the club giving two thumbs up to JARVIS" />
