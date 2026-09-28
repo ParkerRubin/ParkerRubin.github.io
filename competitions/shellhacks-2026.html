@@ -20,11 +20,6 @@
     <link rel="icon" type="image/png" sizes="32x32" href="../icon/favicon-32.png" />
     <link rel="apple-touch-icon" href="../icon/apple-touch-icon.png" />
 
-    <!--
-      Dark-theme override, same tokens as the rest of the site, so this
-      post reads as the same site instead of a light-page holdover.
-      Everything in style.css is built on these :root custom properties.
-    -->
     <style>
       :root {
         --bg: #0A0E14;
@@ -39,27 +34,48 @@
         --accent-3: #F5A34B;
         --accent-3-soft: rgba(245, 163, 75, 0.07);
       }
+      /* Page-only additions: code blocks, captions, photo grid */
+      .post-body pre {
+        background: var(--surface);
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        padding: 1rem;
+        overflow-x: auto;
+        margin: 0.75rem 0 1.5rem;
+        line-height: 1.5;
+      }
+      .post-body pre code {
+        background: transparent;
+        color: var(--ink);
+        padding: 0;
+        font-size: 0.8rem;
+      }
+      .post-body .cap {
+        color: var(--muted);
+        font-size: 0.85rem;
+        margin: -0.75rem 0 1.5rem;
+      }
+      .post-body .shots {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 0.75rem;
+        margin: 1rem 0 1.5rem;
+      }
+      @media (max-width: 520px) { .post-body .shots { grid-template-columns: 1fr; } }
+      .post-body .shots figure { margin: 0; }
+      .post-body .shots img { width: 100%; border-radius: 8px; display: block; }
+      .post-body .shots figcaption { color: var(--muted); font-size: 0.8rem; margin-top: 0.35rem; }
     </style>
   </head>
   <body>
 
     <!--
-      ============================================================
-      PHOTO / VIDEO SLOTS (drop the file into competitions/ with
-      the exact name and it shows up on refresh)
-
-        shellhacks-front.jpg      front angle of JARVIS (top of page)
-        shellhacks-topdown.jpg    top-down shot of the build
-        shellhacks-demo.mp4       early demo video, before it was finalized
-        shellhacks-waymo.jpg      photo with the Waymo sponsor
-        shellhacks-blackstone.jpg photo with the two Blackstone officials
-        shellhacks-club.jpg       photo with a friend from the club
-
-      If a photo is a .png instead of .jpg, either rename the
-      extension here or convert the file, the names must match.
-      Phone videos that come out as .mov should be converted to .mp4
-      so they play in every browser, not just Safari.
-      ============================================================
+      Media files, all in competitions/:
+        shellhacks-front.jpg  shellhacks-topdown.jpg
+        shellhacks-beta.mp4   shellhacks-final.mp4
+        shellhacks-gesture1.jpg  shellhacks-gesture2.jpg
+        shellhacks-blackstone1.jpg  shellhacks-blackstone2.jpg
+        shellhacks-club.jpg  shellhacks-clubfriend.jpg
     -->
 
     <main class="page">
@@ -76,7 +92,14 @@
       <p class="post-date">ShellHacks 2026, Florida International University</p>
 
       <div class="post-body">
-        <img src="../competitions/shellhacks-front.jpg" alt="JARVIS, the desk robot, seen from the front with its webcam mounted on a servo head" style="width: 100%; border-radius: 10px; margin-bottom: 1.5rem;" />
+        <img src="../competitions/shellhacks-front.jpg" alt="JARVIS on the table: a webcam on a servo head, an Arduino, and the laptop showing the tracking view" style="width: 100%; border-radius: 10px; margin-bottom: 1.5rem;" />
+        <p class="cap">
+          JARVIS mid-demo. The webcam sits on the servo on top of the tower, the Arduino is
+          wired in below it, and the laptop shows what it sees: a green TRACKING box on the
+          person in front of it, a blue skeleton over his hand, and nothing on the guy walking
+          past in the background. The status line says "Steadying the head (lag 450 ms)", which
+          is the servo compensating for the camera delay.
+        </p>
 
         <p>
           ShellHacks is Florida's largest hackathon, a weekend at FIU of building something
@@ -99,7 +122,12 @@
           <li>Stay quietly aware of who's in front of it, and in proactive mode, speak up on its own when something is actually worth mentioning</li>
         </ul>
 
-        <img src="../competitions/shellhacks-topdown.jpg" alt="Top-down view of the JARVIS build: webcam on a pan servo, Arduino, and wiring" style="width: 100%; border-radius: 10px; margin: 1rem 0 1.5rem;" />
+        <img src="../competitions/shellhacks-topdown.jpg" alt="The full JARVIS table at ShellHacks 2026" style="width: 100%; border-radius: 10px; margin: 1rem 0 1.5rem;" />
+        <p class="cap">
+          The table. The tower is paint stir sticks and zip ties, with the webcam and servo on
+          top of a couple of small boxes. Behind it is a trifold with my resume and a Blackstone
+          careers flyer, and the Surface laptop running everything is off to the side.
+        </p>
 
         <h3>How it's built</h3>
         <table>
@@ -115,12 +143,91 @@
           </tbody>
         </table>
 
-        <h3>An early demo</h3>
+        <h3>How it works</h3>
         <p>
-          This was recorded before everything was dialed in, but it shows the idea: talking
-          to it, the head turning to follow, and the gesture controls working.
+          <strong>Talking turns into actions.</strong> Every Python function JARVIS can run is
+          wrapped with one decorator. It registers the function by name, logs the call, and
+          makes sure a failure comes back as a sentence the agent can say instead of a crash.
+          A setup script pushes the matching list of 19 tool definitions to the ElevenLabs
+          agent, so the model picks which one to call from what you said, no keyword matching.
         </p>
-        <video src="../competitions/shellhacks-demo.mp4" controls muted playsinline preload="metadata" style="width: 100%; border-radius: 10px; margin: 1rem 0 1.5rem;"></video>
+<pre><code>def tool(fn):
+    def wrapper(params):
+        try: out = fn(params)
+        except QuotaExhausted as e: out = str(e)
+        except Exception as e: out = f"{fn.__name__} failed: {e}"
+        return str(out)
+    TOOLS[fn.__name__] = wrapper
+
+@tool
+def look(p):
+    frame = current_view()   # current camera frame, including zoom
+    ...                      # sent to Gemini with the user's question</code></pre>
+
+        <p>
+          <strong>Picking one face out of a crowd.</strong> YuNet finds every face in the frame,
+          which at a hackathon is a lot of faces. JARVIS keeps only the ones that are big enough
+          and at least 60% the size of the biggest face, so people walking by in the back get
+          dropped. That's why the person walking past in the top photo has no box.
+        </p>
+<pre><code>big = out[0][3]   # height of the largest face
+out = [b for b in out if b[3] >= FACE_MIN and b[3] >= big * 0.6]</code></pre>
+
+        <p>
+          <strong>Moving the head.</strong> Python only sends a target angle like
+          <code>112,90</code> over serial. The Arduino does the motion itself, 66 times a
+          second: it speeds up gently, cruises, and eases in as it lands, so the head never
+          jerks. Python mirrors the same four numbers so it knows where the head is mid-turn.
+        </p>
+<pre><code>float glide(float pos, int target, float &amp;vel) {
+  float d = target - pos;
+  if (fabs(d) &lt;= 0.5 &amp;&amp; fabs(vel) &lt;= ACCEL) { vel = 0; return target; }
+  float want = constrain(d * EASE, -MAX_STEP, MAX_STEP);  // speed we'd like
+  vel += constrain(want - vel, -ACCEL, ACCEL);            // ramp toward it
+  return pos + vel;
+}</code></pre>
+
+        <p>
+          <strong>Gestures.</strong> The MediaPipe hand models from OpenCV Zoo classify the
+          hand, and each gesture maps to one action. A gesture only counts if it's held for
+          about half a second and the hand belongs to the person JARVIS is tracking, so someone
+          waving in the background can't take a photo.
+        </p>
+<pre><code>GESTURE_ACTIONS = {
+    "ThumbsUp":   ("photo in 3", start_photo_countdown),
+    "Two":        ("record", toggle_recording),
+    "Five":       ("mic", toggle_mic),
+    "ThumbsDown": ("reset", reset_zoom_and_tracking),
+}</code></pre>
+
+        <p>
+          <strong>Not talking to itself.</strong> The mic sits a foot from the laptop speakers.
+          While JARVIS is speaking, and for a third of a second after, the audio going to the
+          agent is swapped for silence.
+        </p>
+<pre><code>if S.mic_muted or time.time() &lt; S.speaking_until + 0.35:
+    audio = b"\x00" * len(audio)   # send silence instead of the echo</code></pre>
+
+        <h3>Before and after</h3>
+        <p>
+          Both clips were recorded by JARVIS itself, from the camera on its head. The first is
+          from before the tracking was dialed in. Watch the head overshoot, swing past me, and
+          swing back, with the whole frame smearing from motion blur.
+        </p>
+        <video src="../competitions/shellhacks-beta.mp4" controls muted playsinline loop preload="metadata" style="width: 100%; border-radius: 10px; margin: 1rem 0 1.5rem;"></video>
+        <p>
+          The second is the finished version. I stay centered while the room slides past
+          behind me, no overshoot, no hunting back and forth.
+        </p>
+        <video src="../competitions/shellhacks-final.mp4" controls muted playsinline loop preload="metadata" style="width: 100%; border-radius: 10px; margin: 1rem 0 1.5rem;"></video>
+        <p>
+          The difference came from one idea: stop assuming, and measure. On startup JARVIS
+          nudges the head 8 degrees and watches where my face moves in the image. That tells
+          it which way the servo is mounted, and how long the camera takes to show the move,
+          which is the delay it has to lead by.
+        </p>
+<pre><code>ok = (d &gt; 0) == (PAN_DIR &gt; 0)   # did my face move the way the model expects?
+if not ok: PAN_DIR = -PAN_DIR    # servo is mounted the other way, flip it</code></pre>
 
         <h3>What broke, and what I learned from it</h3>
         <p>
@@ -141,16 +248,13 @@
         <p>
           <strong>The head ran away.</strong> At one point the camera swung all the way to one
           side and stared at the ceiling. The servo was mounted the opposite way from what the
-          code assumed, so every correction pushed me further off center. Instead of guessing,
-          JARVIS now nudges its head 8 degrees on startup, watches which way my face moves in
-          the image, and learns the direction for itself.
+          code assumed, so every correction pushed me further off center. The startup nudge
+          above is the fix.
         </p>
         <p>
-          <strong>It wobbled.</strong> Once tracking worked, the head overshot and corrected
-          back and forth. The webcam image was arriving later than I'd assumed, so it kept
-          reacting to where I was a moment ago. The same startup nudge now also measures that
-          delay, and the controller accounts for it. I also slowed the servo down and gave it
-          a gentle ramp so turns look smooth instead of twitchy.
+          <strong>It wobbled.</strong> That's the first clip. The webcam image was arriving
+          later than I'd assumed, so it kept reacting to where I was a moment ago. Measuring
+          the delay and slowing the servo down with a gentle ramp got it to the second clip.
         </p>
         <p>
           <strong>It chased strangers.</strong> In a room full of hackers, the tracker kept
@@ -172,17 +276,42 @@
 
         <h3>The people</h3>
         <p>
-          JARVIS could take its own photos, so it ended up in a few of them. I got to show it
-          to Waymo and to two people from Blackstone, and it was a good reminder that a
-          working demo starts better conversations than any pitch does.
+          Every photo below was taken by JARVIS, which is why they're all from the same low
+          angle at webcam quality. Most were a thumbs up at the camera and a 3 second
+          countdown. I got to show it to Waymo and to two people from Blackstone, and it was a
+          good reminder that a working demo starts better conversations than any pitch does.
         </p>
-        <!-- Add names below if you want them on the page -->
-        <img src="../competitions/shellhacks-waymo.jpg" alt="Demoing JARVIS with a Waymo sponsor at ShellHacks 2026" style="width: 100%; max-width: 500px; border-radius: 10px; margin: 1rem 0 1.5rem;" />
-        <img src="../competitions/shellhacks-blackstone.jpg" alt="Demoing JARVIS with two Blackstone officials at ShellHacks 2026" style="width: 100%; max-width: 500px; border-radius: 10px; margin: 1rem 0 1.5rem;" />
+        <div class="shots">
+          <figure>
+            <img src="../competitions/shellhacks-gesture1.jpg" alt="Visitor giving JARVIS a thumbs up to trigger a photo" />
+            <figcaption>A thumbs up to the camera, and JARVIS counts down and takes the shot</figcaption>
+          </figure>
+          <figure>
+            <img src="../competitions/shellhacks-gesture2.jpg" alt="Talking through JARVIS with a visitor at the table" />
+            <figcaption>Walking a visitor through how it works</figcaption>
+          </figure>
+          <figure>
+            <img src="../competitions/shellhacks-blackstone1.jpg" alt="With a Blackstone official at ShellHacks 2026" />
+            <figcaption>With one of the Blackstone team</figcaption>
+          </figure>
+          <figure>
+            <img src="../competitions/shellhacks-blackstone2.jpg" alt="With a second Blackstone official at ShellHacks 2026" />
+            <figcaption>And the second from Blackstone</figcaption>
+          </figure>
+        </div>
         <p>
-          And a friend from the FAU Cybersecurity Club stopped by to check it out too.
+          And some friends from the FAU Cybersecurity Club stopped by to check it out too.
         </p>
-        <img src="../competitions/shellhacks-club.jpg" alt="With a friend from the FAU Cybersecurity Club at ShellHacks 2026" style="width: 100%; max-width: 500px; border-radius: 10px; margin: 1rem 0 1.5rem;" />
+        <div class="shots">
+          <figure>
+            <img src="../competitions/shellhacks-club.jpg" alt="Parker with two friends from the club at ShellHacks 2026" />
+            <figcaption>The club crew</figcaption>
+          </figure>
+          <figure>
+            <img src="../competitions/shellhacks-clubfriend.jpg" alt="A friend from the club giving two thumbs up to JARVIS" />
+            <figcaption>Two thumbs up, one photo</figcaption>
+          </figure>
+        </div>
 
         <h3>Key takeaway</h3>
         <p>
