@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+
+    <link rel="icon" type="image/svg+xml" href="icon/favicon.svg" />
+    <link rel="icon" type="image/png" sizes="32x32" href="icon/favicon-32.png" />
+    <link rel="apple-touch-icon" href="icon/apple-touch-icon.png" />
+    
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#0A0E14" />
+    <meta name="description" content="Parker Rubin, Computer Science student focused on cybersecurity and blue team operations." />
+    <title>Parker Rubin</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+      rel="stylesheet"
+    />
+    <link href="assets/style/style.css" rel="stylesheet" />
+
+    <!--
+      Dark-theme override, scoped to this page only. Everything in
+      style.css is built on the :root custom properties below, so
+      redefining just the tokens (rather than rewriting every rule)
+      reskins the whole page consistently. blog.html and the individual
+      posts still use the original light tokens from style.css itself,
+      so there will be a visible split between Profile (dark) and Blog
+      (light) until/unless those get the same treatment.
+    -->
+    <style>
+      :root {
+        --bg: #0A0E14;
+        --surface: #171D2B;
+        --ink: #E7EAF0;
+        --muted: #8891A3;
+        --line: #232B3D;
+        --accent: #8B7CF6;
+        --accent-soft: rgba(139, 124, 246, 0.09);
+        --accent-2: #2DD4BF;
+        --accent-2-soft: rgba(45, 212, 191, 0.14);
+        --accent-3: #F5A34B;
+        --accent-3-soft: rgba(245, 163, 75, 0.07);
+      }
+
+      /* The hero's ambient glow (radial gradients behind the portrait)
+         blended invisibly into the original light background at just
+         2px of blur. Against the new dark background, that same box
+         read as a hard-edged rectangle, and clipping it to the hero
+         (overflow: hidden, to stop it bleeding into the tab-nav above)
+         introduced a new version of the same problem: the glow didn't
+         fully fade to nothing before hitting that clip boundary, so the
+         hero's own box silhouette became visible instead. Padding gives
+         it room to dissipate before the edge, and a lower opacity on
+         the soft tokens above makes any residual edge far less
+         noticeable either way. */
+      .hero {
+        overflow: hidden;
+        padding: 2.5rem 0 1rem;
+      }
+      .hero::before {
+        top: 0;
+        filter: blur(60px);
+      }
+    </style>
+  </head>
+  <body>
+    <main class="page">
+
+      <!-- Tabs -->
+      <nav class="tab-nav">
+        <a href="index.html" class="active">Profile</a>
+        <a href="blog.html">Blog</a>
+      </nav>
+
+      <!-- Hero -->
+      <section class="hero">
+        <div class="portrait">
+          <img src="assets/pfp.jpg" alt="Parker Rubin" />
+        </div>
+        <h1 class="name" id="name">Parker Rubin</h1>
+        <span class="accent-line" aria-hidden="true"></span>
+        <p class="role">Computer science student focused on cybersecurity and blue team operations</p>
+        <p class="location"><i class="fa-solid fa-location-dot"></i> Boca Raton, Florida</p>
+      </section>
+
+      <!-- About -->
+      <section class="block" id="about">
+        <h2 class="accent-a">About</h2>
+        <p>
+          I'm a Computer Science student at FAU with experience as a SOC Analyst intern,
+          working across alert triage, incident response, and system level tooling. I care
+          about both sides of the fence: blue team detection and response, and the
+          offensive thinking that makes a detection rule worth writing in the first place,
+          since you can't catch what you don't understand.
+        </p>
+        <p>
+          That's part of why I build instead of just use. SentryOS, a full EDR platform
+          with an AI-assisted triage layer, taught me more about real detection
+          engineering than any single course did. I'm especially interested in DFIR, blue
+          team operations, and figuring out where AI actually earns a place in a security
+          workflow, not bolted on for the sake of it.
+        </p>
+      </section>
+
+      <!-- Projects -->
+      <section class="block" id="projects">
+        <h2 class="accent-b">Projects</h2>
+
+        <a class="project-row" href="../EDR-Project/index.html">
+          <div class="project-text">
+            <h3>SentryOS - building an EDR from the ground up</h3>
+            <p>SentryOS is an endpoint detection and response platform I designed, built, and now
+      actually run: a Windows agent, a backend that decides what's worth flagging, and a
+      console my friends log into to see their own machines, and nobody else's.</p>
+          </div>
+          <i class="fa-solid fa-arrow-up-right"></i>
+        </a>
+        
+        <a class="project-row" href="https://github.com/ParkerRubin/CCDC-Script">
+          <div class="project-text">
+            <h3>SOC Competition Scripts</h3>
+            <p>A blue-team toolkit built for CCDC-style competitions: PowerShell scripts for firewall hardening, point-in-time system snapshots, and full triage (process/PID correlation, persistence checks, targeted security event review). Built to harden Windows hosts fast without breaking scoring, with rollback built in at every step.</p>
+          </div>
+          <i class="fa-solid fa-arrow-up-right"></i>
+        </a>
+
+      </section>
+
+      <!-- Certifications -->
+      <section class="block" id="certifications">
+        <h2 class="accent-c">Certifications</h2>
+
+        <div class="accordion">
+          <button class="accordion-header" aria-expanded="false">
+            <span>SentinelOne IR Engineer (SIREN)</span>
+            <i class="fa-solid fa-chevron-down"></i>
+          </button>
+          <div class="accordion-panel">
+            <p>
+              Employer sponsored capstone certification for incident response partners.
+              Covered Deep Visibility (S1QL) threat hunting, Storyline based investigation,
+              Singularity blocklist and exclusion administration, incident handling
+              workflows, and false positive tuning across the SentinelOne EDR platform.
+            </p>
+            <ul class="badge-list">
+              <li>Threat Hunting I: Hunting in Ops Center, Feb 2026</li>
+              <li>Troubleshooting Windows Agent Interoperability Issues, Mar 2026</li>
+              <li>Troubleshooting Endpoint Performance Issues, Mar 2026</li>
+              <li>Singularity Administration: Managing Blocklists and Exclusions, Mar 2026</li>
+              <li>Incident Response: Incident Handling with the Singularity Platform, Mar 2026</li>
+              <li>Incident Response: Tuning to Reduce False Positives with SentinelOne, Mar 2026</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="accordion">
+          <button class="accordion-header" aria-expanded="false">
+            <span>IBM SkillsBuild Cybersecurity Certificate</span>
+            <i class="fa-solid fa-chevron-down"></i>
+          </button>
+          <div class="accordion-panel">
+            <p>
+              Six badge cybersecurity certificate track covering governance and risk,
+              vulnerability management, system and network security, cloud security,
+              security operations, and incident response and forensics. In progress.
+            </p>
+            <ul class="badge-list">
+              <li>Governance, Risk, Compliance, and Data Privacy, Jul 2026</li>
+              <li>Vulnerability Management, Jul 2026</li>
+              <li>System and Network Security, Jul 2026</li>
+              <!-- Add remaining badges as earned:
+              <li>Cloud Security, Month Year</li>
+              <li>Security Operations and Management, Month Year</li>
+              <li>Incident Response and System Forensics, Month Year</li>
+              -->
+            </ul>
+          </div>
+        </div>
+
+        <div class="accordion">
+          <button class="accordion-header" aria-expanded="false">
+            <span>Foundations of Cybersecurity, Google</span>
+            <i class="fa-solid fa-chevron-down"></i>
+          </button>
+          <div class="accordion-panel">
+            <p>
+              First course in the Google Cybersecurity Certificate. Introduces the
+              cybersecurity profession, including entry level analyst responsibilities
+              and core skills, the events that shaped the field, and the CIA triad.
+              Covers the CISSP eight security domains, common security frameworks and
+              controls, security ethics, and the tools cybersecurity analysts use day to day.
+            </p>
+          </div>
+        </div>
+
+        <div class="accordion">
+          <button class="accordion-header" aria-expanded="false">
+            <span>Microsoft Security Essentials Professional Certificate</span>
+            <i class="fa-solid fa-chevron-down"></i>
+          </button>
+          <div class="accordion-panel">
+            <p>
+              Microsoft and LinkedIn, in progress. Covers the CIA triad and core
+              information security principles, cybersecurity threats including malware,
+              phishing, social engineering, and identity theft, governance risk and
+              compliance, the cloud shared responsibility model, defense in depth, zero
+              trust, identity and access management, Azure security services, Microsoft
+              Security Copilot for incident analysis, and Microsoft's endpoint, data
+              governance, and threat intelligence solutions.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Contact -->
+      <section class="block" id="contact">
+        <h2 class="accent-b">Contact</h2>
+        <div class="contact-row">
+          <a href="mailto:pdrrubinn@gmail.com"><i class="fa-solid fa-envelope"></i> Email</a>
+          <a href="assets/style/Parker_Rubin_Resume-Sept.pdf?v=3" target="_blank"><i class="fa-solid fa-file-lines"></i> Resume</a>
+          <a href="https://github.com/ParkerRubin" target="_blank"><i class="fa-brands fa-github"></i> GitHub</a>
+          <a href="https://www.linkedin.com/in/parkerrubin" target="_blank"><i class="fa-brands fa-linkedin-in"></i> LinkedIn</a>
+        </div>
+      </section>
+
+    </main>
+    <script src="assets/js/script.js"></script>
+  </body>
+</html>

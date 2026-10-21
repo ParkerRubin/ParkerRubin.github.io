@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <link rel="icon" type="image/svg+xml" href="icon/favicon.svg" />
+    <link rel="icon" type="image/png" sizes="32x32" href="icon/favicon-32.png" />
+    <link rel="apple-touch-icon" href="icon/apple-touch-icon.png" />
+
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#0A0E14" />
+    <meta name="description" content="Parker Rubin, security writeups and notes." />
+    <title>Parker Rubin, Blog</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+      rel="stylesheet"
+    />
+    <link href="assets/style/style.css" rel="stylesheet" />
+
+    <!--
+      Dark-theme override, same tokens as index.html's Profile page, so
+      both pages read as one consistent site instead of a light/dark
+      split. Everything in style.css is built on these :root custom
+      properties, so redefining just the values reskins the whole page
+      without touching the shared stylesheet the individual post pages
+      (labs/bec-phishing/index.html, etc.) still depend on.
+    -->
+    <style>
+      :root {
+        --bg: #0A0E14;
+        --surface: #171D2B;
+        --ink: #E7EAF0;
+        --muted: #8891A3;
+        --line: #232B3D;
+        --accent: #8B7CF6;
+        --accent-soft: rgba(139, 124, 246, 0.09);
+        --accent-2: #2DD4BF;
+        --accent-2-soft: rgba(45, 212, 191, 0.14);
+        --accent-3: #F5A34B;
+        --accent-3-soft: rgba(245, 163, 75, 0.07);
+      }
+    </style>
+  </head>
+  <body>
+    <main class="page">
+      <!-- Tabs -->
+      <nav class="tab-nav">
+        <a href="index.html">Profile</a>
+        <a href="blog.html" class="active">Blog</a>
+      </nav>
+      <section class="block">
+        <h2 class="accent-a">Writeups</h2>
+
+        <a class="post-row" href="competitions/shellhacks/index.html">
+          <div class="project-text">
+            <div class="post-tags">
+              <span class="tag tag-forensics">Competition</span>
+            </div>
+            <h3>ShellHacks 2026</h3>
+            <p>Building JARVIS, a voice-controlled desk robot that sees, follows you with a servo head, and acts on your computer</p>
+          </div>
+          <i class="fa-solid fa-arrow-up-right"></i>
+        </a>
+
+        <a class="post-row" href="competitions/sfissa/index.html">
+          <div class="project-text">
+            <div class="post-tags">
+              <span class="tag tag-forensics">Competition</span>
+            </div>
+            <h3>SFISSA Hack the Flag</h3>
+            <p>First-place finish at SFISSA 2026 Hack the Flag with the FAU Cybersecurity Club</p>
+          </div>
+          <i class="fa-solid fa-arrow-up-right"></i>
+        </a>
+
+        <a class="post-row" href="competitions/ccdc/index.html">
+          <div class="project-text">
+            <div class="post-tags">
+              <span class="tag tag-forensics">Competition</span>
+            </div>
+            <h3>CCDC Qualifiers</h3>
+            <p>Writing injects and running incident response for FAU's blue team, ranked 15th of 45</p>
+          </div>
+          <i class="fa-solid fa-arrow-up-right"></i>
+        </a>
+
+        <a class="post-row" href="https://github.com/ParkerRubin/CCDC-Script">
+          <div class="project-text">
+            <div class="post-tags">
+              <span class="tag tag-ir">Incident response</span>
+            </div>
+            <h3>SOC Competition Scripts</h3>
+            <p>PowerShell toolkit for CCDC-style competitions: firewall hardening, system snapshots, and full host triage, built to harden fast without breaking scoring</p>
+          </div>
+          <i class="fa-solid fa-arrow-up-right"></i>
+        </a>
+
+        <a class="post-row" href="EDR-Project/index.html">
+          <div class="project-text">
+            <div class="post-tags">
+              <span class="tag tag-ir">Incident response</span>
+            </div>
+            <h3>SentryOS, Building an EDR From the Ground Up</h3>
+            <p>Designing, building, and running a full endpoint detection and response platform: Windows agent, backend, and a multi-user console, for real machines, not a demo</p>
+          </div>
+          <i class="fa-solid fa-arrow-up-right"></i>
+        </a>
+
+        <a class="post-row" href="labs/slowloris/index.html">
+          <div class="project-text">
+            <div class="post-tags">
+              <span class="tag tag-network">Blue team</span>
+            </div>
+            <h3>Slow and Low, Defeating Slowloris with nginx Timeouts</h3>
+            <p>Running a Slowloris DoS attack against nginx, hardening the config to defeat it, and reading the difference in the packet captures</p>
+          </div>
+          <i class="fa-solid fa-arrow-up-right"></i>
+        </a>
+
+        <a class="post-row" href="labs/bec-phishing/index.html">
+          <div class="project-text">
+            <div class="post-tags">
+              <span class="tag tag-network">Network forensics</span>
+            </div>
+            <h3>Catch Me If You Can, BEC Phishing Investigation</h3>
+            <p>Tracing a business email compromise campaign back to its source through raw SMTP traffic in Wireshark</p>
+          </div>
+          <i class="fa-solid fa-arrow-up-right"></i>
+        </a>
+
+        <a class="post-row" href="labs/auditd/index.html">
+          <div class="project-text">
+            <div class="post-tags">
+              <span class="tag tag-ir">Incident response</span>
+            </div>
+            <h3>Let's wget This Bread, File Integrity Monitoring with Auditd</h3>
+            <p>Using Linux audit logs to attribute three simulated attacks to the exact files they modified</p>
+          </div>
+          <i class="fa-solid fa-arrow-up-right"></i>
+        </a>
+      </section>
+    </main>
+    <script src="assets/js/script.js"></script>
+  </body>
+</html>

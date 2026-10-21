@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+
+    <link rel="icon" type="image/svg+xml" href="../../icon/favicon.svg" />
+    <link rel="icon" type="image/png" sizes="32x32" href="../../icon/favicon-32.png" />
+    <link rel="apple-touch-icon" href="../../icon/apple-touch-icon.png" />
+
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#0A0E14" />
+    <meta name="description" content="Running a Slowloris DoS attack against nginx, then hardening the config to defeat it, and reading the difference in packet captures." />
+    <title>Slow and Low, Defeating Slowloris with nginx Timeouts</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+      rel="stylesheet"
+    />
+    <link href="../../assets/style/style.css" rel="stylesheet" />
+
+    <!--
+      Dark-theme override, same tokens as index.html and blog.html, so
+      this post reads as the same site instead of a light-page holdover.
+      Everything in style.css is built on these :root custom properties.
+    -->
+    <style>
+      :root {
+        --bg: #0A0E14;
+        --surface: #171D2B;
+        --ink: #E7EAF0;
+        --muted: #8891A3;
+        --line: #232B3D;
+        --accent: #8B7CF6;
+        --accent-soft: rgba(139, 124, 246, 0.09);
+        --accent-2: #2DD4BF;
+        --accent-2-soft: rgba(45, 212, 191, 0.14);
+        --accent-3: #F5A34B;
+        --accent-3-soft: rgba(245, 163, 75, 0.07);
+      }
+    </style>
+  </head>
+  <body>
+    <main class="page">
+
+      <a class="back-link" href="../../blog.html"><i class="fa-solid fa-arrow-left"></i> Back to blog</a>
+
+      <div class="post-tags">
+        <span class="tag tag-ir">Blue team</span>
+      </div>
+      <h1 class="name" style="font-size: 1.8rem; text-align: left; animation: none; opacity: 1; transform: none;">
+        Slow and Low, Defeating Slowloris with nginx Timeouts
+      </h1>
+      <p class="post-date">nginx, Slowloris, Netdata, Wireshark</p>
+
+      <div class="post-body">
+        <p>
+          A blue-team project built around one application-layer DoS attack: run
+          Slowloris against a local nginx server, watch it exhaust the connection
+          pool, then harden the config so the same attack falls flat. The last step
+          is forensic, two packet captures, one from a protected server and one from
+          a vulnerable one, and figuring out which is which from the traffic alone.
+        </p>
+
+        <h3>Objective</h3>
+        <ul>
+          <li>Run a Slowloris attack against nginx and observe connection exhaustion in Netdata</li>
+          <li>Add nginx mitigation rules (timeouts, connection and rate limits) and prove they defeat the attack</li>
+          <li>Compare the TCP socket behavior before and after hardening</li>
+          <li>Analyze two packet captures in Wireshark to attribute which server was protected</li>
+        </ul>
+
+        <h3>How Slowloris works</h3>
+        <p>
+          Slowloris is a low-bandwidth attack. Instead of flooding the server with
+          traffic, it opens hundreds of connections and sends HTTP headers a few bytes
+          at a time, deliberately slowly, never finishing the request. nginx politely
+          waits for each one to complete, so every connection slot fills with a stalled
+          client and real users can't get in. Because each request looks like ordinary
+          HTTP, volumetric defenses that watch for traffic spikes miss it entirely. The
+          fix isn't more bandwidth, it's refusing to hold a connection that won't make
+          progress.
+        </p>
+
+        <h3>Attack 1, unprotected</h3>
+        <p>
+          With default nginx, I launched the attack with 500 sockets:
+          <code>slowloris 127.0.0.1 -s 500</code>. The TCP socket count climbed straight
+          to the ceiling (~1K sockets, counting both ends of each loopback connection)
+          and held there flat for the duration. That plateau is the server saturated,
+          every slot occupied, nothing freeing up.
+        </p>
+
+        <img src="photos/unprotected.png" alt="Netdata TCP sockets graph flat at the ceiling during the unprotected Slowloris attack, with the attack terminal showing 500 sockets held open" style="width: 100%; border-radius: 10px; margin: 1rem 0 1.5rem;" />
+        <p>Unprotected: sockets pinned at the ceiling and held. nginx accepts every slow connection and waits, so the pool never recovers while the attack runs.</p>
+
+        <h3>Hardening nginx</h3>
+        <p>
+          The mitigation went into a dedicated <code>/etc/nginx/conf.d/default.conf</code>.
+          The directives that actually kill Slowloris are the short header and body
+          timeouts (nginx hangs up on any client that dribbles its request past five
+          seconds) backed by a per-IP connection cap and request rate limit so a single
+          source can't monopolize the pool.
+        </p>
+
+        <img src="photos/config.png" alt="nginx conf.d/default.conf showing client_header_timeout, client_body_timeout, keepalive_timeout, limit_conn and limit_req mitigation rules" style="width: 100%; border-radius: 10px; margin: 1rem 0 1.5rem;" />
+        <p>The hardened config. <code>client_header_timeout 5s</code> is the Slowloris killer, <code>limit_conn</code> caps connections per IP, and <code>limit_req</code> rate-limits requests.</p>
+
+        <p>
+          Enabling it surfaced a conflict: both the new config and the stock
+          <code>sites-enabled/default</code> claimed port 80 as <code>default_server</code>,
+          so nginx refused to load with a <code>duplicate default server</code> error.
+          Removing the stock symlink left my hardened block as the sole server on port 80,
+          and the config test passed.
+        </p>
+
+        <img src="photos/protectscript.png" alt="Terminal showing the duplicate default_server error from nginx -t, removing the sites-enabled/default symlink, and the config test passing" style="width: 100%; border-radius: 10px; margin: 1rem 0 1.5rem;" />
+        <p>Resolving the duplicate <code>default_server</code> clash, remove the stock site symlink, then <code>nginx -t</code> comes back clean.</p>
+
+        <img src="photos/nginxstart.png" alt="systemctl status nginx showing the service active and running with master and worker processes" style="width: 100%; border-radius: 10px; margin: 1rem 0 1.5rem;" />
+        <p>nginx back up and running with the hardened config loaded.</p>
+
+        <h3>Attack 2, protected</h3>
+        <p>
+          Same attack, same 500 sockets. This time the graph tells a completely different
+          story. Connections still spike, Slowloris opens its batch in a fast burst before
+          the timeout can act, but then nginx's five-second deadline fires and mass-kills
+          the stalled connections, dropping the count toward zero. Slowloris rebuilds, nginx
+          kills them again, producing a sawtooth instead of a plateau. The legend tells the
+          whole story: <code>timewait 501</code>, roughly 500 sockets in the TIME_WAIT
+          cleanup state, meaning nginx just closed that many connections. On the unprotected
+          run, timewait stayed near zero because nginx closed nothing.
+        </p>
+
+        <img src="photos/protected.png" alt="Netdata TCP sockets graph showing a sawtooth pattern during the protected Slowloris attack, with timewait at 501 in the legend" style="width: 100%; border-radius: 10px; margin: 1rem 0 1.5rem;" />
+        <p>Protected: the sawtooth is nginx culling stalled connections on its own schedule. Slots keep freeing up, so the server stays responsive. Note <code>timewait 501</code>, proof of the mass teardown.</p>
+
+        <p>
+          The real difference isn't whether connections open, it's who controls when they
+          die. Unprotected, the attacker decides and the server is a passive host holding
+          slots hostage. Protected, the server enforces its own deadline and refuses to be
+          held.
+        </p>
+
+        <h3>Reading the packet captures</h3>
+        <p>
+          The forensic stretch: two <code>.pcap</code> files, one protected server and one
+          vulnerable, identify each from traffic alone. Filtering on
+          <code>tcp.flags.reset == 1</code> settled it. Capture A was full of RST packets,
+          the server forcibly tearing down connections that failed to complete their headers
+          in time, the exact packet-level signature of the timeout mitigation. Capture B had
+          zero resets: that server never closed the stalled connections and instead held them
+          open, which is how a vulnerable server behaves under Slowloris. The TCP conversation
+          data backed it up, A's connections were short-lived and sparse (many connections, a
+          packet or two each, killed fast), consistent with a server actively dropping slow
+          clients. A is the mitigated server, B is the vulnerable one.
+        </p>
+
+        <h3>Tools used</h3>
+        <ul>
+          <li>nginx, configuring timeout, <code>limit_conn</code> and <code>limit_req</code> mitigation rules</li>
+          <li>Slowloris, generating the application-layer attack traffic</li>
+          <li>Netdata, live monitoring of TCP socket state during each attack</li>
+          <li>Wireshark, filtering on TCP flags to attribute protected vs. vulnerable captures</li>
+        </ul>
+
+        <h3>Key takeaway</h3>
+        <p>
+          Application-layer DoS is a configuration problem before it's a bandwidth problem.
+          Slowloris wins against defaults not because it's heavy but because it exploits a
+          polite server's willingness to wait. The entire defense came down to a handful of
+          directives that enforce resource boundaries the server already controls, and the
+          same hardware went from dead to self-healing on config alone. Reading it afterward
+          in a packet capture, telling "under attack" from "handling an attack" by who's
+          sending the resets, is the kind of attribution work that turns a monitoring alert
+          into an actual finding.
+        </p>
+
+        <p>
+          <a href="https://github.com/ParkerRubin" target="_blank">View more projects on GitHub</a>
+        </p>
+      </div>
+
+    </main>
+    <script src="../../assets/js/script.js"></script>
+  </body>
+</html>

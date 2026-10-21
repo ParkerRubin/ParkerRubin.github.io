@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#0A0E14" />
+    <meta name="description" content="Building JARVIS at ShellHacks 2026: a voice-controlled desk robot that sees, follows you with a servo head, and acts on your computer." />
+    <title>ShellHacks 2026</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+      rel="stylesheet"
+    />
+    <link href="../../assets/style/style.css" rel="stylesheet" />
+    <link rel="icon" type="image/svg+xml" href="../../icon/favicon.svg" />
+    <link rel="icon" type="image/png" sizes="32x32" href="../../icon/favicon-32.png" />
+    <link rel="apple-touch-icon" href="../../icon/apple-touch-icon.png" />
+
+    <style>
+      :root {
+        --bg: #0A0E14;
+        --surface: #171D2B;
+        --ink: #E7EAF0;
+        --muted: #8891A3;
+        --line: #232B3D;
+        --accent: #8B7CF6;
+        --accent-soft: rgba(139, 124, 246, 0.09);
+        --accent-2: #2DD4BF;
+        --accent-2-soft: rgba(45, 212, 191, 0.14);
+        --accent-3: #F5A34B;
+        --accent-3-soft: rgba(245, 163, 75, 0.07);
+      }
+
+      /* Page-only additions: links, figures, captions, collage, code blocks */
+      .post-body a { color: var(--accent); }
+      .post-body a:hover { text-decoration: underline; }
+      .post-body .repo-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.55rem 1rem;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: var(--surface);
+        color: var(--ink);
+        font-weight: 500;
+      }
+      .post-body .repo-link:hover { border-color: var(--accent); text-decoration: none; }
+      .post-body figure { margin: 1rem 0 1.75rem; }
+      .post-body figure img,
+      .post-body figure video {
+        width: 100%;
+        height: auto;
+        border-radius: 10px;
+        display: block;
+        background: var(--surface);
+      }
+      .post-body figure.tall { max-width: 460px; margin-left: auto; margin-right: auto; }
+      .post-body figcaption {
+        color: var(--muted);
+        font-size: 0.85rem;
+        line-height: 1.5;
+        margin-top: 0.5rem;
+      }
+      .post-body .collage {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0.5rem;
+      }
+      .post-body .shots {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 0.75rem;
+        margin: 1rem 0 1.75rem;
+      }
+      .post-body .shots figure { margin: 0; }
+      .post-body .shots img { border-radius: 8px; }
+      .post-body .shots figcaption { font-size: 0.8rem; margin-top: 0.35rem; }
+      @media (max-width: 520px) {
+        .post-body .collage,
+        .post-body .shots { grid-template-columns: 1fr; }
+      }
+      .post-body pre {
+        background: var(--surface);
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        padding: 1rem;
+        overflow-x: auto;
+        margin: 0.75rem 0 1.75rem;
+        line-height: 1.5;
+      }
+      .post-body pre code {
+        background: transparent;
+        color: var(--ink);
+        padding: 0;
+        font-size: 0.8rem;
+      }
+    </style>
+  </head>
+  <body>
+
+    <!--
+      Media files, all in competitions/:
+        shellhacks-team.jpg  shellhacks-me.jpg  shellhacks-front.jpg  shellhacks-topdown.jpg
+        shellhacks-beta.mp4  shellhacks-beta-poster.jpg  shellhacks-final.mp4  shellhacks-final-poster.jpg
+        shellhacks-gesture1.jpg  shellhacks-gesture2.jpg  shellhacks-blackstone1.jpg  shellhacks-blackstone2.jpg
+        shellhacks-club.jpg  shellhacks-clubfriend.jpg  shellhacks-fiu.jpg
+    -->
+
+    <main class="page">
+
+      <a class="back-link" href="../../blog.html"><i class="fa-solid fa-arrow-left"></i> Back to blog</a>
+
+      <div class="post-tags">
+        <span class="tag tag-forensics">Competition</span>
+        <span class="tag tag-network">Hackathon</span>
+      </div>
+      <h1 class="name" style="font-size: 1.8rem; text-align: left; animation: none; opacity: 1; transform: none;">
+        ShellHacks 2026
+      </h1>
+      <p class="post-date">ShellHacks 2026, Florida International University</p>
+
+      <div class="post-body">
+        <figure>
+          <div class="collage">
+            <img src="photos/shellhacks-team.jpg" width="1400" height="1050" alt="The JARVIS team in front of the ShellHacks wall" />
+            <img src="photos/shellhacks-me.jpg" width="1400" height="1050" alt="Parker at the ShellHacks wall" />
+          </div>
+          <figcaption>
+            The team, plus one of me at the wall. Big thanks to my teammates for a weekend of
+            building, breaking, and fixing things together. Really happy to have been here.
+          </figcaption>
+        </figure>
+
+        <p>
+          ShellHacks is Florida's largest hackathon, a weekend at FIU of building something
+          from nothing and demoing it to judges and sponsors on Sunday. I went in planning to
+          build an AI voice clone detector, pivoted partway through the weekend, and came out
+          with JARVIS: a desk robot you talk to that can see through its camera, turn to follow
+          you, and actually do things on your computer when you ask.
+        </p>
+        <p style="margin: 1rem 0 1.5rem;">
+          <a class="repo-link" href="https://github.com/ParkerRubin/ShellHacks" target="_blank" rel="noopener"><i class="fa-brands fa-github"></i> View the code on GitHub</a>
+        </p>
+
+        <h3>What JARVIS does</h3>
+        <p>
+          Most AI assistants live in a chat window and have no idea what's happening in the
+          room. JARVIS sits on the desk instead. You talk to it out loud, and it can:
+        </p>
+        <ul>
+          <li>See what you're holding and answer questions about it, read labels, or read what's on your screen</li>
+          <li>Follow your face with a servo head, or lock onto any object you point it at and keep that in view</li>
+          <li>React to hand gestures: thumbs up takes a photo on a 3, 2, 1 countdown, a peace sign starts and stops recording, an open palm mutes the mic</li>
+          <li>Take photos, record video, zoom in on details, copy text it reads to the clipboard, run web searches, and write up a report of the whole session</li>
+          <li>Stay quietly aware of who's in front of it, and in proactive mode, speak up on its own when something is actually worth mentioning</li>
+        </ul>
+
+        <p>
+          Here it is mid-demo. The webcam sits on the servo at the top of the tower with the
+          Arduino wired in next to it, and the laptop shows what JARVIS sees: a green TRACKING
+          box on the person in front of it, a blue skeleton over his hand from the gesture
+          model, and no box at all on the guy walking past in the background. The status line
+          at the bottom reads "Steadying the head (lag 450 ms)", the servo compensating for how
+          late the camera image arrives.
+        </p>
+        <figure class="tall">
+          <img src="photos/shellhacks-front.jpg" width="1050" height="1400" loading="lazy" decoding="async" alt="JARVIS on the table: a webcam on a servo head, an Arduino, and the laptop showing the tracking view" />
+          <figcaption>JARVIS tracking one face and one hand, ignoring the room behind it.</figcaption>
+        </figure>
+
+        <h3>How it's built</h3>
+        <p>
+          The hardware is about as scrappy as it gets. The tower is paint stir sticks and zip
+          ties, the servo and webcam sit on a couple of small boxes on top, and the Surface
+          laptop off to the side runs everything. Behind it was a trifold with my resume and a
+          Blackstone careers flyer.
+        </p>
+        <figure>
+          <img src="photos/shellhacks-topdown.jpg" width="1400" height="1050" loading="lazy" decoding="async" alt="The full JARVIS table at ShellHacks 2026" />
+          <figcaption>The table at ShellHacks.</figcaption>
+        </figure>
+        <p>The software is where most of the work went:</p>
+        <table>
+          <thead>
+            <tr><th>Piece</th><th>What it does</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>ElevenLabs Conversational AI</td><td>The voice. Every capability is a tool the agent decides to call on its own, 19 in total</td></tr>
+            <tr><td>Gemini</td><td>The eyes: answers questions about the camera and screen, finds objects by name, reads text</td></tr>
+            <tr><td>OpenCV + OpenCV Zoo</td><td>Local models for faces (YuNet), hands and gestures (MediaPipe), and object tracking (VitTrack), no API calls</td></tr>
+            <tr><td>Arduino + servo</td><td>The head. Python sends angles over serial, the Arduino glides the servo there smoothly</td></tr>
+            <tr><td>Python</td><td>Ties it together, with a live camera window, a control bar, keyboard shortcuts, and live captions</td></tr>
+          </tbody>
+        </table>
+
+        <h3>How it works</h3>
+        <p>
+          Every snippet below is trimmed from the real code in the
+          <a href="https://github.com/ParkerRubin/ShellHacks" target="_blank" rel="noopener">JARVIS repo</a>.
+        </p>
+        <p>
+          <strong>Talking turns into actions.</strong> Every Python function JARVIS can run is
+          wrapped with one decorator. It registers the function by name, logs the call, and
+          makes sure a failure comes back as a sentence the agent can say instead of a crash.
+          A setup script pushes the matching list of 19 tool definitions to the ElevenLabs
+          agent, so the model picks which one to call from what you said, no keyword matching.
+        </p>
+<pre><code>def tool(fn):
+    def wrapper(params):
+        try: out = fn(params)
+        except QuotaExhausted as e: out = str(e)
+        except Exception as e: out = f"{fn.__name__} failed: {e}"
+        return str(out)
+    TOOLS[fn.__name__] = wrapper
+
+@tool
+def look(p):
+    frame = current_view()   # current camera frame, including zoom
+    ...                      # sent to Gemini with the user's question</code></pre>
+
+        <p>
+          <strong>Picking one face out of a crowd.</strong> YuNet finds every face in the frame,
+          which at a hackathon is a lot of faces. JARVIS keeps only the ones that are big enough
+          and at least 60% the size of the biggest face, so people walking by in the back get
+          dropped. That's why the person walking past in the demo photo has no box.
+        </p>
+<pre><code>big = out[0][3]   # height of the largest face
+out = [b for b in out if b[3] >= FACE_MIN and b[3] >= big * 0.6]</code></pre>
+
+        <p>
+          <strong>Moving the head.</strong> Python only sends a target angle like
+          <code>112,90</code> over serial. The Arduino does the motion itself, 66 times a
+          second: it speeds up gently, cruises, and eases in as it lands, so the head never
+          jerks. Python mirrors the same four numbers so it knows where the head is mid-turn.
+        </p>
+<pre><code>float glide(float pos, int target, float &amp;vel) {
+  float d = target - pos;
+  if (fabs(d) &lt;= 0.5 &amp;&amp; fabs(vel) &lt;= ACCEL) { vel = 0; return target; }
+  float want = constrain(d * EASE, -MAX_STEP, MAX_STEP);  // speed we'd like
+  vel += constrain(want - vel, -ACCEL, ACCEL);            // ramp toward it
+  return pos + vel;
+}</code></pre>
+
+        <p>
+          <strong>Gestures.</strong> The MediaPipe hand models from OpenCV Zoo classify the
+          hand, and each gesture maps to one action. A gesture only counts if it's held for
+          about half a second and the hand belongs to the person JARVIS is tracking, so someone
+          waving in the background can't take a photo.
+        </p>
+<pre><code>GESTURE_ACTIONS = {
+    "ThumbsUp":   ("photo in 3", start_photo_countdown),
+    "Two":        ("record", toggle_recording),
+    "Five":       ("mic", toggle_mic),
+    "ThumbsDown": ("reset", reset_zoom_and_tracking),
+}</code></pre>
+
+        <p>
+          <strong>Not talking to itself.</strong> The mic sits a foot from the laptop speakers.
+          While JARVIS is speaking, and for a third of a second after, the audio going to the
+          agent is swapped for silence.
+        </p>
+<pre><code>if S.mic_muted or time.time() &lt; S.speaking_until + 0.35:
+    audio = b"\x00" * len(audio)   # send silence instead of the echo</code></pre>
+
+        <h3>Before and after</h3>
+        <p>
+          Both clips were recorded by JARVIS itself, from the camera on its head. The first is
+          from before the tracking was dialed in. Watch the head overshoot, swing past the person
+          in front of it, and swing back, with the whole frame smearing from motion blur.
+        </p>
+        <figure>
+          <video src="photos/shellhacks-beta.mp4" poster="photos/shellhacks-beta-poster.jpg" width="640" height="480" controls muted playsinline loop preload="none"></video>
+          <figcaption>Before: overshoot and hunting.</figcaption>
+        </figure>
+        <p>
+          The second is the finished version. The person stays centered while the room
+          slides past behind them, no overshoot, no hunting back and forth.
+        </p>
+        <figure>
+          <video src="photos/shellhacks-final.mp4" poster="photos/shellhacks-final-poster.jpg" width="640" height="480" controls muted playsinline loop preload="none"></video>
+          <figcaption>After: a smooth follow.</figcaption>
+        </figure>
+        <p>
+          The difference came from one idea: stop assuming, and measure. On startup JARVIS
+          nudges the head 8 degrees and watches where the face moves in the image. That tells
+          it which way the servo is mounted, and how long the camera takes to show the move,
+          which is the delay it has to lead by.
+        </p>
+<pre><code>ok = (d &gt; 0) == (PAN_DIR &gt; 0)   # did the face move the way the model expects?
+if not ok: PAN_DIR = -PAN_DIR    # servo is mounted the other way, flip it</code></pre>
+
+        <h3>What broke, and what I learned from it</h3>
+        <p>
+          Most of the weekend wasn't writing features, it was finding out why the real
+          hardware didn't behave like the plan.
+        </p>
+        <p>
+          <strong>It said the word instead of doing the thing.</strong> The first time I
+          asked what it could see, the agent just said "look" out loud. The tool existed but
+          was never properly attached to the agent, so the model treated it as a word. I ended
+          up scripting the entire agent setup so that couldn't drift again.
+        </p>
+        <p>
+          <strong>It talked to itself.</strong> The mic picked up JARVIS's own voice from the
+          speakers, so it kept answering itself in a loop. Muting the mic while it speaks,
+          plus a mute toggle, fixed it.
+        </p>
+        <p>
+          <strong>The head ran away.</strong> At one point the camera swung all the way to one
+          side and stared at the ceiling. The servo was mounted the opposite way from what the
+          code assumed, so every correction pushed the target further off center. The startup
+          nudge above is the fix.
+        </p>
+        <p>
+          <strong>It wobbled.</strong> That's the first clip. The webcam image was arriving
+          later than I'd assumed, so it kept reacting to where the person was a moment ago.
+          Measuring the delay and slowing the servo down with a gentle ramp got it to the
+          second clip.
+        </p>
+        <p>
+          <strong>It chased strangers.</strong> In a room full of hackers, the tracker kept
+          jumping to people walking behind me. It now locks onto one main person, ignores
+          small faces in the background, and holds the lock if I briefly turn away.
+        </p>
+        <p>
+          <strong>It ran out of eyes.</strong> The free Gemini tier allowed about 20 requests a
+          day, and my background awareness loop burned through that fast. That pushed me to
+          move everything I could onto local models, and to only call the cloud when a
+          question actually needs it.
+        </p>
+
+        <div class="callout">
+          The biggest lesson of the weekend: the gap between "it works in my head" and "it
+          works on the table" is where all the real engineering happened. Every fix that
+          mattered came from watching the hardware misbehave and measuring why.
+        </div>
+
+        <h3>The people</h3>
+        <p>
+          Every photo below was taken by JARVIS, which is why they're all from the same low
+          angle at webcam quality. Most were a thumbs up at the camera and a 3 second
+          countdown. I got to show it to Waymo and to two people from Blackstone, and it was a
+          good reminder that a working demo starts better conversations than any pitch does.
+        </p>
+        <div class="shots">
+          <figure>
+            <img src="photos/shellhacks-gesture1.jpg" width="640" height="480" loading="lazy" decoding="async" alt="Visitor giving JARVIS a thumbs up to trigger a photo" />
+            <figcaption>A thumbs up to the camera, and JARVIS counts down and takes the shot</figcaption>
+          </figure>
+          <figure>
+            <img src="photos/shellhacks-gesture2.jpg" width="640" height="480" loading="lazy" decoding="async" alt="Talking through JARVIS with a visitor at the table" />
+            <figcaption>Walking a visitor through how it works</figcaption>
+          </figure>
+          <figure>
+            <img src="photos/shellhacks-blackstone1.jpg" width="640" height="480" loading="lazy" decoding="async" alt="A Blackstone official at the JARVIS table" />
+            <figcaption>One of the Blackstone team</figcaption>
+          </figure>
+          <figure>
+            <img src="photos/shellhacks-blackstone2.jpg" width="640" height="480" loading="lazy" decoding="async" alt="A second Blackstone official at the JARVIS table" />
+            <figcaption>And the second from Blackstone</figcaption>
+          </figure>
+        </div>
+        <p>
+          A friend from the FAU Cybersecurity Club stopped by to check it out too, and the team
+          got in front of it one more time.
+        </p>
+        <div class="shots">
+          <figure>
+            <img src="photos/shellhacks-club.jpg" width="640" height="480" loading="lazy" decoding="async" alt="The team, photographed by JARVIS" />
+            <figcaption>The team again, this time shot by JARVIS</figcaption>
+          </figure>
+          <figure>
+            <img src="photos/shellhacks-clubfriend.jpg" width="640" height="480" loading="lazy" decoding="async" alt="A friend from the club giving two thumbs up to JARVIS" />
+            <figcaption>Two thumbs up, one photo</figcaption>
+          </figure>
+        </div>
+
+        <h3>Key takeaway</h3>
+        <p>
+          I came in as a security person and left having built a robot, a voice agent, and a
+          computer vision pipeline in one weekend. I used Claude as a coding partner to move
+          faster, but the part I'm proudest of is the debugging: figuring out why a servo runs
+          away, why a camera lies about timing, and how to make an assistant useful without
+          letting it talk over you. The code is on
+          <a href="https://github.com/ParkerRubin/ShellHacks" target="_blank" rel="noopener">GitHub</a>.
+        </p>
+        <p>
+          Walking out at night, with the FIU sign lit up blue against the dark, it hit me how much fun
+          the whole weekend was. Tired, a little sleep deprived, and really glad I was there.
+          Thanks to the ShellHacks organizers and every sponsor who stopped by the table.
+        </p>
+        <figure class="tall">
+          <img src="photos/shellhacks-fiu.jpg" width="1050" height="1400" loading="lazy" decoding="async" alt="The FIU sign lit up blue on a campus building at night" />
+          <figcaption>FIU at night, on the way out.</figcaption>
+        </figure>
+
+        <p style="margin: 1rem 0 1.5rem;">
+          <a class="repo-link" href="https://github.com/ParkerRubin/ShellHacks" target="_blank" rel="noopener"><i class="fa-brands fa-github"></i> View the repo on GitHub</a>
+        </p>
+      </div>
+
+    </main>
+    <script src="../../assets/js/script.js"></script>
+  </body>
+</html>
