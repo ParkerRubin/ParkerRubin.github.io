@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+
+    <link rel="icon" type="image/svg+xml" href="../../icon/favicon.svg" />
+    <link rel="icon" type="image/png" sizes="32x32" href="../../icon/favicon-32.png" />
+    <link rel="apple-touch-icon" href="../../icon/apple-touch-icon.png" />
+
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#0A0E14" />
+    <meta name="description" content="Picking up a handed-off RAT incident in Catalyst, auditing the first responder's report, and researching its IOCs." />
+    <title>Second Set of Eyes, Relay Analysis of a RAT Incident</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+      rel="stylesheet"
+    />
+    <link href="../../assets/style/style.css" rel="stylesheet" />
+
+    <style>
+      :root {
+        --bg: #0A0E14;
+        --surface: #171D2B;
+        --ink: #E7EAF0;
+        --muted: #8891A3;
+        --line: #232B3D;
+        --accent: #8B7CF6;
+        --accent-soft: rgba(139, 124, 246, 0.09);
+        --accent-2: #2DD4BF;
+        --accent-2-soft: rgba(45, 212, 191, 0.14);
+        --accent-3: #F5A34B;
+        --accent-3-soft: rgba(245, 163, 75, 0.07);
+      }
+      .post-body h4 {
+        font-family: var(--font-display);
+        font-weight: 600;
+        font-size: 0.95rem;
+        margin: 1.6rem 0 0.6rem;
+        color: var(--accent-2);
+      }
+      .post-body pre {
+        background: var(--surface);
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        padding: 0.85rem 1rem;
+        overflow-x: auto;
+        margin: 0 0 1.4rem;
+        font-size: 0.8rem;
+        line-height: 1.5;
+      }
+      .post-body pre code {
+        background: none;
+        color: var(--ink);
+        padding: 0;
+        font-size: inherit;
+        white-space: pre;
+      }
+      .post-body img {
+        display: block;
+        width: 100%;
+        height: auto;
+        border-radius: 10px;
+        margin: 0.4rem 0 0.9rem;
+        box-shadow: 0 0 0 1px var(--line);
+        cursor: zoom-in;
+      }
+      .fig-cap {
+        font-size: 0.85rem;
+        color: var(--muted);
+        margin-top: -0.3rem;
+        margin-bottom: 1.4rem;
+      }
+      .table-wrap {
+        overflow-x: auto;
+        margin-bottom: 1.4rem;
+      }
+    </style>
+  </head>
+  <body>
+    <main class="page">
+
+      <a class="back-link" href="../../blog.html"><i class="fa-solid fa-arrow-left"></i> Back to blog</a>
+
+      <div class="post-tags">
+        <span class="tag tag-ir">Incident response</span>
+      </div>
+      <h1 class="name" style="font-size: 1.8rem; text-align: left; animation: none; opacity: 1; transform: none;">
+        Second Set of Eyes, Relay Analysis of a RAT Incident
+      </h1>
+      <p class="post-date">Catalyst, VirusTotal, AbuseIPDB, IOC triage</p>
+
+      <div class="post-body">
+        <p>
+          In the CodePath CYB102 Incident Response lab, I played the relay analyst on PathCode's
+          CSIRT. A first responder, Sam Johnson, had already handled a malware incident and
+          filed a short report. My job was to pick the case up in Catalyst, check every
+          indicator myself, find what the report missed, and write the analysis that turns
+          first-responder notes into a real post-incident record.
+        </p>
+
+        <h3>The incident</h3>
+        <p>
+          On May 7, 2023, user Jordan Anderson clicked a link in a social media post that looked
+          like a news article. It led to a malicious domain, a Word document downloaded, and a
+          Remote Access Trojan (RAT) ran on <code>PC-002</code>. Sam isolated the machine at
+          16:15 UTC, backed it up, removed the malware, and returned it to the user by 17:30.
+          Sam's report listed three indicators, all rated high confidence.
+        </p>
+        <div class="table-wrap">
+          <table>
+            <tr><th>Indicator</th><th>Value</th><th>Sam's source</th></tr>
+            <tr><td>MD5 hash</td><td><code>3AADBF7E527FC1A050E1C97FEA1CBA4D</code></td><td>Antivirus</td></tr>
+            <tr><td>IP</td><td><code>93.184.216[.]34</code></td><td>VirusTotal</td></tr>
+            <tr><td>URL</td><td><code>hxxp[:]//bad-weather-app[.]net/download123.doc</code></td><td>AbuseIPDB</td></tr>
+          </table>
+        </div>
+
+        <h3>Documenting the case</h3>
+        <p>
+          I opened the incident in Catalyst as <code>IR-2023-002</code>, set severity to High,
+          added a task for each indicator, and left a comment on each one with what the lookup
+          tools reported and my verdict.
+        </p>
+        <img src="photos/catalyst-case.png" alt="Catalyst incident IR-2023-002 with three IOC tasks and analyst comments" />
+        <p class="fig-cap">IR-2023-002 in Catalyst, one task per indicator with lookup comments underneath.</p>
+
+        <h3>Triage</h3>
+        <p>
+          <strong>Severity: High.</strong> A RAT gives an outside attacker hands-on control of
+          <code>PC-002</code>, so the risk reaches anything Jordan's account could touch while it
+          ran. VirusTotal backed that up by identifying the file as a W97M macro dropper built to
+          pull down a second stage. I stopped short of Critical because the known scope is one
+          endpoint with no evidence yet of lateral movement or exfiltration.
+        </p>
+        <p>
+          <strong>TLP: AMBER.</strong> The record names a specific user and host and still has
+          open questions about what the attacker did, so it shouldn't be public. The hash is
+          still worth sharing with IT, the SOC and trusted partners for blocking, which RED
+          wouldn't allow.
+        </p>
+
+        <h3>IOC research</h3>
+        <div class="table-wrap">
+          <table>
+            <tr><th>Indicator</th><th>What the tools said</th><th>Verdict</th></tr>
+            <tr><td>MD5 hash (<code>docer.doc</code>)</td><td>VirusTotal: 48/63 vendors, trojan.valyria/w97m, obfuscated auto-open VBA macros, dropper and downloader behavior</td><td>Malicious</td></tr>
+            <tr><td><code>93.184.216[.]34</code></td><td>VirusTotal: 2/92 vendors, TLS cert for www.example.org. AbuseIPDB: 0% confidence, no reports in 60 days</td><td>Weak signal</td></tr>
+            <tr><td><code>bad-weather-app[.]net</code></td><td>VirusTotal: 0/92 vendors, no match on the full URL</td><td>Unknown</td></tr>
+          </table>
+        </div>
+        <div class="callout">
+          Sam rated the IP high confidence malicious, but its certificate shows it's shared IANA
+          example-domain hosting, not attacker infrastructure. Blocking it would add noise without
+          touching the real C2, which means the actual callback address was never identified.
+          Sam also cited AbuseIPDB for the URL, but AbuseIPDB rates IPs, not domains.
+        </div>
+
+        <h3>Gap analysis</h3>
+        <p>
+          The report never says what the RAT did before isolation at 16:15. There's no confirmed
+          C2 address, no persistence check, and no mention of resetting Jordan's credentials.
+          With a RAT that gap matters most, because the attacker could have harvested passwords
+          or reached other systems in that window. The incident can't be called closed until
+          someone answers those questions.
+        </p>
+
+        <h3>Detection gap</h3>
+        <p>
+          Kill chain: link &rarr; resolve &rarr; <strong>download</strong> &rarr; execute. The
+          domain came back clean, so DNS reputation filtering wouldn't have stopped the link. The
+          file, though, is flagged by 48 vendors. A secure web gateway that scans Office
+          downloads against AV signatures or detonates them in a sandbox would have stopped
+          <code>docer.doc</code> before it ever reached <code>PC-002</code>.
+        </p>
+
+        <h3>Recommendation</h3>
+        <p>
+          A second layer at the <strong>execute</strong> step: enforce the Group Policy
+          "Block macros from running in Office files from the Internet" and enable the Defender
+          Attack Surface Reduction rule "Block all Office applications from creating child
+          processes." Downloaded files carry the Mark of the Web, so Office won't run their
+          macros, and even if one does run, Word can't spawn the PowerShell or cmd process the
+          dropper needs to fetch the RAT. If a malicious document slips past the gateway, it
+          still can't run its payload.
+        </p>
+        <p>
+          <strong>Classification: True Positive.</strong> The file is a confirmed malicious
+          dropper and the user confirmed opening it. The weak IP and clean domain lower
+          confidence in the infrastructure indicators, not in the fact that malware ran.
+        </p>
+
+        <h3>Arguing the other side</h3>
+        <p>
+          The strongest case against my call is that this should be Medium. What's confirmed is
+          a macro dropper. The RAT itself rests on Sam's report, the IP is shared hosting, and
+          nobody documented C2 traffic from <code>PC-002</code>. It's possible the macro ran and
+          the second stage never landed. Proxy or EDR logs from that window would settle it: if
+          <code>WINWORD.EXE</code> spawned a child process that reached an attacker IP, High
+          stands. If not, the infection likely stalled at the dropper.
+        </p>
+
+        <h3>Tools used</h3>
+        <ul>
+          <li>Catalyst (incident tickets, tasks, comments) in Docker</li>
+          <li>VirusTotal for file, IP and domain reputation</li>
+          <li>AbuseIPDB for IP abuse history</li>
+        </ul>
+
+        <h3>Key takeaway</h3>
+        <p>
+          A second analyst is only as useful as their willingness to recheck the first one's
+          work. Every indicator in this report was labeled high confidence, and only one held up.
+          The relay analyst's real value is separating what's proven from what's assumed, and
+          writing down what's still open so the next person knows where the risk is.
+        </p>
+
+        <p>
+          <a href="https://github.com/codepath/opencyber-catalyst-lab" target="_blank">CodePath Incident Response (Catalyst) Lab on GitHub</a>
+        </p>
+      </div>
+
+    </main>
+    <script src="../../assets/js/script.js"></script>
+  </body>
+</html>
