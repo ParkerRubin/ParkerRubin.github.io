@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+
+    <link rel="icon" type="image/svg+xml" href="../../icon/favicon.svg" />
+    <link rel="icon" type="image/png" sizes="32x32" href="../../icon/favicon-32.png" />
+    <link rel="apple-touch-icon" href="../../icon/apple-touch-icon.png" />
+
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#0A0E14" />
+    <meta name="description" content="Hunting for SolarWinds and Scattered Spider indicators in proxy logs with Splunk correlation searches and VirusTotal." />
+    <title>Following the Breadcrumbs, Threat Hunting in Splunk</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+      rel="stylesheet"
+    />
+    <link href="../../assets/style/style.css" rel="stylesheet" />
+
+    <style>
+      :root {
+        --bg: #0A0E14;
+        --surface: #171D2B;
+        --ink: #E7EAF0;
+        --muted: #8891A3;
+        --line: #232B3D;
+        --accent: #8B7CF6;
+        --accent-soft: rgba(139, 124, 246, 0.09);
+        --accent-2: #2DD4BF;
+        --accent-2-soft: rgba(45, 212, 191, 0.14);
+        --accent-3: #F5A34B;
+        --accent-3-soft: rgba(245, 163, 75, 0.07);
+      }
+      .post-body h4 {
+        font-family: var(--font-display);
+        font-weight: 600;
+        font-size: 0.95rem;
+        margin: 1.6rem 0 0.6rem;
+        color: var(--accent-2);
+      }
+      .post-body pre {
+        background: var(--surface);
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        padding: 0.85rem 1rem;
+        overflow-x: auto;
+        margin: 0 0 1.4rem;
+        font-size: 0.8rem;
+        line-height: 1.5;
+      }
+      .post-body pre code {
+        background: none;
+        color: var(--ink);
+        padding: 0;
+        font-size: inherit;
+        white-space: pre;
+      }
+      .post-body img {
+        display: block;
+        width: 100%;
+        height: auto;
+        border-radius: 10px;
+        margin: 0.4rem 0 0.9rem;
+        box-shadow: 0 0 0 1px var(--line);
+        cursor: zoom-in;
+      }
+      .fig-cap {
+        font-size: 0.85rem;
+        color: var(--muted);
+        margin-top: -0.3rem;
+        margin-bottom: 1.4rem;
+      }
+      .table-wrap {
+        overflow-x: auto;
+        margin-bottom: 1.4rem;
+      }
+    </style>
+  </head>
+  <body>
+    <main class="page">
+
+      <a class="back-link" href="../../blog.html"><i class="fa-solid fa-arrow-left"></i> Back to blog</a>
+
+      <div class="post-tags">
+        <span class="tag tag-forensics">Threat hunting</span>
+      </div>
+      <h1 class="name" style="font-size: 1.8rem; text-align: left; animation: none; opacity: 1; transform: none;">
+        Following the Breadcrumbs, Threat Hunting in Splunk
+      </h1>
+      <p class="post-date">Splunk, SPL correlation searches, VirusTotal</p>
+
+      <div class="post-body">
+        <p>
+          Acting as a SOC analyst for PathCode Inc., a fictional company from the CodePath
+          CYB102 Threat Hunt Lab, I hunted for evidence of two real-world attacks in the
+          company's outbound proxy logs. Each investigation paired a threat intelligence feed
+          with a set of network logs: the SolarWinds supply chain compromise against 2020
+          traffic, and Scattered Spider's phishing infrastructure against 2024 traffic. The job
+          was to find which PathCode machines talked to known bad infrastructure, when, and
+          what that says about the company's defenses.
+        </p>
+
+        <h3>Objective</h3>
+        <ul>
+          <li>Load threat intel feeds and proxy logs into Splunk and correlate them with SPL</li>
+          <li>Identify every indicator that appears in both the feed and PathCode's traffic</li>
+          <li>Record the date, time and computer behind each hit</li>
+          <li>Check each matched indicator's current reputation on VirusTotal</li>
+          <li>Compare the two incidents and assess PathCode's security posture</li>
+        </ul>
+
+        <h3>Method</h3>
+        <p>
+          The technique is event correlation. Search both sources at once, group by the field
+          they share, and keep only the values that show up in more than one source. If an IP
+          or domain lives in the threat feed <em>and</em> the proxy log, a PathCode machine
+          reached out to it.
+        </p>
+        <pre><code>(source="IOCs_SolarWinds.txt" OR source="TrafficLog_SolarWinds.txt")
+| stats values(source) as sources, values(Date) as Date, values(Time) as Time,
+        values("Computer Name") as Computer by "IP Address"
+| where mvcount(sources) &gt; 1</code></pre>
+        <p>
+          The catch is that the shared field changes between datasets. The SolarWinds feed and
+          logs join on <code>IP Address</code>. The Scattered Spider feed is a list of
+          domains, and its proxy log records the destination domain, so that hunt joins on
+          <code>Domain</code> instead.
+        </p>
+        <pre><code>(source="IOCs_ScatteredSpider.txt" OR source="TrafficLog_ScatteredSpider.txt")
+| stats values(source) as sources, values(Date) as Date, values(Time) as Time,
+        values("Computer Name") as Computer, values(Type) as Type by Domain
+| where mvcount(sources) &gt; 1</code></pre>
+        <p>
+          For the screenshots below, I filtered each search to a single indicator so every
+          result row shows both source files side by side, which is the proof of a match.
+        </p>
+
+        <h3>Investigation 1: SolarWinds (2020)</h3>
+        <p>
+          In December 2020, attackers slipped malicious code into a legitimate SolarWinds
+          software update. Organizations that installed it unknowingly opened a line to
+          attacker-controlled servers. Three IPs from the SolarWinds IOC list turned up in
+          PathCode's 2020 proxy logs.
+        </p>
+        <div class="table-wrap">
+          <table>
+            <tr><th>IP</th><th>Date and time</th><th>Computer</th></tr>
+            <tr><td><code>5.252.177[.]25</code></td><td>2020-12-09 07:04:28</td><td>WS-SolarLight-943</td></tr>
+            <tr><td></td><td>2020-12-09 07:37:28</td><td>MX-SolarStorm-136</td></tr>
+            <tr><td></td><td>2020-12-11 07:11:28</td><td>LN-SolarStrike-14</td></tr>
+            <tr><td><code>13.59.205[.]66</code></td><td>2020-12-10 06:57:28</td><td>WS-SolarWave-212</td></tr>
+            <tr><td><code>54.215.192[.]52</code></td><td>2020-12-11 07:10:28</td><td>LN-SolarShadow-552</td></tr>
+          </table>
+        </div>
+
+        <img src="photos/solarwinds-5-252-177-25.png" alt="Splunk correlation result for 5.252.177.25 showing both SolarWinds sources and three computers" />
+        <p class="fig-cap">5.252.177[.]25 was contacted by three different machines over three days, the strongest sign of ongoing communication in this dataset.</p>
+
+        <img src="photos/solarwinds-13-59-205-66.png" alt="Splunk correlation result for 13.59.205.66 on WS-SolarWave-212" />
+        <p class="fig-cap">13.59.205[.]66, a single connection from WS-SolarWave-212.</p>
+
+        <img src="photos/solarwinds-54-215-192-52.png" alt="Splunk correlation result for 54.215.192.52 on LN-SolarShadow-552" />
+        <p class="fig-cap">54.215.192[.]52, a single connection from LN-SolarShadow-552.</p>
+
+        <h3>Investigation 2: Scattered Spider (2024)</h3>
+        <p>
+          Scattered Spider leans on social engineering instead of custom malware. They call
+          employees posing as IT helpdesk, push them toward fake SSO and VPN login pages, and
+          harvest credentials or MFA approvals. Three of their domains showed up in PathCode's
+          2024 proxy logs, spread across four departments.
+        </p>
+        <div class="table-wrap">
+          <table>
+            <tr><th>Domain</th><th>Type</th><th>Date and time</th><th>Computer</th></tr>
+            <tr><td><code>logonlink[.]com</code></td><td>VPN portal impersonation</td><td>2024-09-16 11:15:44</td><td>WS-DevOps-441</td></tr>
+            <tr><td></td><td></td><td>2024-09-16 11:28:09</td><td>WS-Finance-307</td></tr>
+            <tr><td><code>ciscoacclink[.]com</code></td><td>VPN portal impersonation</td><td>2024-09-15 14:23:17</td><td>WS-IT-204</td></tr>
+            <tr><td><code>linkedinsso[.]com</code></td><td>SSO phishing</td><td>2024-09-15 09:47:32</td><td>WS-HR-088</td></tr>
+          </table>
+        </div>
+
+        <img src="photos/spider-logonlink.png" alt="Splunk correlation result for logonlink.com on WS-DevOps-441 and WS-Finance-307" />
+        <p class="fig-cap">logonlink[.]com, a fake VPN portal, reached by two machines 13 minutes apart.</p>
+
+        <img src="photos/spider-ciscoacclink.png" alt="Splunk correlation result for ciscoacclink.com on WS-IT-204" />
+        <p class="fig-cap">ciscoacclink[.]com, another fake VPN portal, from an IT workstation.</p>
+
+        <img src="photos/spider-linkedinsso.png" alt="Splunk correlation result for linkedinsso.com on WS-HR-088" />
+        <p class="fig-cap">linkedinsso[.]com, an SSO phishing page, from an HR workstation.</p>
+
+        <h3>VirusTotal check</h3>
+        <p>
+          Threat intel ages, so I looked up every matched indicator to see how it reads today.
+        </p>
+        <div class="table-wrap">
+          <table>
+            <tr><th>Indicator</th><th>Campaign</th><th>Vendors flagging</th></tr>
+            <tr><td><code>5.252.177[.]25</code></td><td>SolarWinds</td><td>11</td></tr>
+            <tr><td><code>13.59.205[.]66</code></td><td>SolarWinds</td><td>6</td></tr>
+            <tr><td><code>54.215.192[.]52</code></td><td>SolarWinds</td><td>9</td></tr>
+            <tr><td><code>logonlink[.]com</code></td><td>Scattered Spider</td><td>13</td></tr>
+            <tr><td><code>linkedinsso[.]com</code></td><td>Scattered Spider</td><td>12</td></tr>
+            <tr><td><code>ciscoacclink[.]com</code></td><td>Scattered Spider</td><td>7</td></tr>
+          </table>
+        </div>
+
+        <div class="callout">
+          The 2020 IPs are flagged at about the same rate as the 2024 domains. A VirusTotal
+          flag reflects history more than current activity, so a years-old IOC can look just
+          as bad as a fresh one. That cuts both ways: it's a good lead, but it isn't proof the
+          infrastructure is still attacker-controlled, especially for cloud IPs that get
+          reassigned.
+        </div>
+
+        <h3>Analysis</h3>
+        <p>
+          From December 9 to 11, 2020, five PathCode systems connected to three IPs tied to the
+          SolarWinds compromise, including 5.252.177[.]25, which was contacted by
+          WS-SolarLight-943, MX-SolarStorm-136 and LN-SolarStrike-14. From September 15 to 16,
+          2024, four systems across HR, IT, DevOps and Finance reached three Scattered Spider
+          phishing and fake VPN domains, including logonlink[.]com, which was visited by
+          WS-DevOps-441 and WS-Finance-307. Both attacks succeeded through the same mechanism,
+          outbound connections to known bad infrastructure, years apart. That tells me PathCode
+          isn't filtering outbound traffic against threat intel, and the fix is to feed those
+          lists into the proxy or DNS layer so connections like these get blocked instead of
+          found after the fact.
+        </p>
+
+        <h3>Tools used</h3>
+        <ul>
+          <li>Splunk Enterprise in Docker, CSV upload, Search &amp; Reporting</li>
+          <li>SPL: <code>OR</code> across sources, <code>stats values()</code>, <code>mvcount()</code>, <code>where</code></li>
+          <li>VirusTotal for current indicator reputation</li>
+        </ul>
+
+        <h3>Key takeaway</h3>
+        <p>
+          The correlation search is simple, but reading the data first is what makes it work.
+          The same SPL found a supply chain attack and a social engineering campaign once the
+          join field matched the data. The harder part is judgment: a match tells you a machine
+          talked to something bad, and the analyst's job is to explain which machines, when,
+          and what it means for the organization.
+        </p>
+
+        <p>
+          <a href="https://github.com/codepath/opencyber-threat-hunt-lab" target="_blank">CodePath Threat Hunt Lab on GitHub</a>
+        </p>
+      </div>
+
+    </main>
+    <script src="../../assets/js/script.js"></script>
+  </body>
+</html>
