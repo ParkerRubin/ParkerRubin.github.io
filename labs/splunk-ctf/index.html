@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+
+    <link rel="icon" type="image/svg+xml" href="../../icon/favicon.svg" />
+    <link rel="icon" type="image/png" sizes="32x32" href="../../icon/favicon-32.png" />
+    <link rel="apple-touch-icon" href="../../icon/apple-touch-icon.png" />
+
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#0A0E14" />
+    <meta name="description" content="A Splunk CTF: answering investigative questions across a Netflix dataset and tracing a malware upload back to the attacker." />
+    <title>SIEMsational, a Splunk CTF</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+      rel="stylesheet"
+    />
+    <link href="../../assets/style/style.css" rel="stylesheet" />
+
+    <style>
+      :root {
+        --bg: #0A0E14;
+        --surface: #171D2B;
+        --ink: #E7EAF0;
+        --muted: #8891A3;
+        --line: #232B3D;
+        --accent: #8B7CF6;
+        --accent-soft: rgba(139, 124, 246, 0.09);
+        --accent-2: #2DD4BF;
+        --accent-2-soft: rgba(45, 212, 191, 0.14);
+        --accent-3: #F5A34B;
+        --accent-3-soft: rgba(245, 163, 75, 0.07);
+      }
+      .post-body h4 {
+        font-family: var(--font-display);
+        font-weight: 600;
+        font-size: 0.95rem;
+        margin: 1.6rem 0 0.6rem;
+        color: var(--accent-2);
+      }
+      .post-body pre {
+        background: var(--surface);
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        padding: 0.85rem 1rem;
+        overflow-x: auto;
+        margin: 0 0 1.4rem;
+        font-size: 0.8rem;
+        line-height: 1.5;
+      }
+      .post-body pre code {
+        background: none;
+        color: var(--ink);
+        padding: 0;
+        font-size: inherit;
+        white-space: pre;
+      }
+      .post-body img {
+        display: block;
+        width: 100%;
+        height: auto;
+        border-radius: 10px;
+        margin: 0.4rem 0 0.9rem;
+        box-shadow: 0 0 0 1px var(--line);
+        cursor: zoom-in;
+      }
+      .fig-cap {
+        font-size: 0.85rem;
+        color: var(--muted);
+        margin-top: -0.3rem;
+        margin-bottom: 1.4rem;
+      }
+      .table-wrap {
+        overflow-x: auto;
+        margin-bottom: 1.4rem;
+      }
+    </style>
+  </head>
+  <body>
+    <main class="page">
+
+      <a class="back-link" href="../../blog.html"><i class="fa-solid fa-arrow-left"></i> Back to blog</a>
+
+      <div class="post-tags">
+        <span class="tag tag-forensics">SIEM</span>
+      </div>
+      <h1 class="name" style="font-size: 1.8rem; text-align: left; animation: none; opacity: 1; transform: none;">
+        SIEMsational, a Splunk CTF
+      </h1>
+      <p class="post-date">Splunk, SPL, log investigation</p>
+
+      <div class="post-body">
+        <p>
+          A capture-the-flag challenge from CodePath's CYB102 Splunk Lab. There's no step-by-step
+          guide, just two datasets and a list of questions. You form a hypothesis, write the SPL
+          to prove it, and submit the answer with the search that found it. I answered all 15
+          questions for the full 20 points: ten warm-ups on a Netflix catalog, then five on a
+          malware investigation in a fictional company's web server logs.
+        </p>
+
+        <h3>Objective</h3>
+        <ul>
+          <li>Filter, aggregate and sort log data with SPL to answer specific questions</li>
+          <li>Work with messy fields: multi-value genres, text durations, inconsistent timestamps</li>
+          <li>Trace an attacker across multiple log sources from a single file hash</li>
+        </ul>
+
+        <h3>Part 1: Netflix data</h3>
+        <p>
+          The Netflix set is about getting fluent in the basics: field filters, wildcards,
+          <code>stats count</code>, and <code>sort</code>. A few questions needed more than a
+          filter.
+        </p>
+        <div class="table-wrap">
+          <table>
+            <tr><th>#</th><th>Question</th><th>Answer</th></tr>
+            <tr><td>1</td><td>TV shows in the Docuseries genre</td><td>395</td></tr>
+            <tr><td>2</td><td>Movies rated TV-PG</td><td>540</td></tr>
+            <tr><td>3</td><td>Movies released in 2020</td><td>517</td></tr>
+            <tr><td>4</td><td>Longest show by seasons, and its rating</td><td>Grey's Anatomy, 17 seasons, TV-14</td></tr>
+            <tr><td>5</td><td>PG-13 Action &amp; Adventure movies</td><td>148</td></tr>
+            <tr><td>6</td><td>Titles from Turkey</td><td>105</td></tr>
+            <tr><td>7</td><td>Year with the most G-rated movies</td><td>2009</td></tr>
+            <tr><td>8</td><td>TV-Y7 shows released in 2019 and added Nov 22, 2019</td><td>Trolls: The Beat Goes On! and The Dragon Prince</td></tr>
+            <tr><td>9</td><td>Year with the most US TV shows</td><td>2020</td></tr>
+            <tr><td>10</td><td>Oldest TV show by release year</td><td>Pioneers: First Women Filmmakers*</td></tr>
+          </table>
+        </div>
+
+        <h4>Genres are a list, not a value</h4>
+        <p>
+          A title can sit in several genres at once, stored as one comma-separated string. An
+          exact match on <code>listed_in</code> misses most of them, so wildcards do the work:
+        </p>
+        <pre><code>index=main source="*netflix_titles.csv" type="TV Show" listed_in="*Docuseries*"
+| stats count</code></pre>
+
+        <h4>Durations are text</h4>
+        <p>
+          Question 4 looks easy until you notice <code>duration</code> is stored as text like
+          "17 Seasons". Sorting text puts "9 Seasons" above "17 Seasons". Splitting off the
+          number and converting it fixes the sort:
+        </p>
+        <pre><code>index=main source="*netflix_titles.csv" type="TV Show"
+| eval seasons=tonumber(mvindex(split(duration," "),0))
+| sort 0 - seasons | head 1
+| table title duration rating</code></pre>
+
+        <h4>"Which year had the most" is stats, then sort</h4>
+        <pre><code>index=main source="*netflix_titles.csv" type="Movie" rating="G"
+| stats count by release_year | sort - count | head 1</code></pre>
+
+        <h3>Part 2: Investigating the malware</h3>
+        <p>
+          The second dataset is PathCode's web server, authentication and upload logs. The only
+          starting point is an MD5 hash of a known malicious file:
+          <code>3AADBF7E527FC1A050E1C97FEA1CBA4D</code>.
+        </p>
+
+        <h4>Who uploaded it</h4>
+        <p>
+          A raw search for the hash across the whole index pointed straight at the uploader's IP,
+          <code>192.168.1.10</code>.
+        </p>
+        <pre><code>index=pathcode 3AADBF7E527FC1A050E1C97FEA1CBA4D</code></pre>
+
+        <h4>What they tried first</h4>
+        <p>
+          Pivoting on that IP and lining events up by time showed the attacker trying logins as
+          <strong>Admin</strong>, then <strong>Pi</strong>, then <strong>ABurke</strong>, and
+          uploading the file once ABurke worked. Classic credential guessing against common
+          default names before landing on a real account.
+        </p>
+        <pre><code>index=pathcode "192.168.1.10" earliest=0 latest=now
+| dedup _raw
+| table _time source Username Event "User Agent"
+| sort _time</code></pre>
+        <p>
+          The upload log recorded the attacker's user agent as
+          <code>Opera/75.0.3969.218</code>.
+        </p>
+
+        <h4>Separating the attacker from a real user</h4>
+        <p>
+          Another account, Jmann, uploaded a file from <code>192.168.1.7</code> at 15:29, eight
+          minutes after the attacker's upload at 15:21. Pulling both from the upload hashes log
+          showed what each one sent:
+        </p>
+        <pre><code>index=pathcode source="*uploadedhashes.csv" (IP="192.168.1.10" OR IP="192.168.1.7")
+earliest=0 latest=now
+| dedup _raw
+| table _time IP _raw</code></pre>
+        <div class="table-wrap">
+          <table>
+            <tr><th>User</th><th>IP</th><th>Time</th><th>File</th></tr>
+            <tr><td>ABurke (attacker)</td><td><code>192.168.1.10</code></td><td>15:21</td><td><code>EvilScript.exe</code></td></tr>
+            <tr><td>Jmann</td><td><code>192.168.1.7</code></td><td>15:29</td><td><code>proposal.pdf</code></td></tr>
+          </table>
+        </div>
+        <p>
+          <code>EvilScript.exe</code> is the malicious one. It's an executable, it matches the
+          hash from the start of the investigation, and it came from the IP that spent the
+          session guessing passwords. Jmann's upload was a normal user doing normal work that
+          happened to land eight minutes later, which is exactly why you confirm before you blame.
+        </p>
+
+        <div class="callout">
+          This hash shows up again later in the course. It's the same one VirusTotal identifies as
+          <code>docer.doc</code>, a W97M macro dropper, in my
+          <a href="../catalyst-ir/index.html">Catalyst IR writeup</a>, where VirusTotal flagged it
+          48/63.
+        </div>
+
+        <h3>The gotcha</h3>
+        <p>
+          Partway through, searches that should have returned events came back empty. Clicking
+          into an event's details had quietly locked Splunk's time picker to that one event's
+          timestamp. Adding <code>earliest=0 latest=now</code> to the search forces All Time no
+          matter what the picker says, which is why it's on every Part 2 search above. Adding
+          <code>dedup _raw</code> also cleaned up duplicate rows from the data being indexed
+          more than once.
+        </p>
+
+        <h3>Tools used</h3>
+        <ul>
+          <li>Splunk Enterprise in Docker, Search &amp; Reporting</li>
+          <li>SPL: wildcards, <code>stats</code>, <code>sort</code>, <code>eval</code>, <code>split</code>, <code>mvindex</code>, <code>tonumber</code>, <code>dedup</code>, <code>table</code></li>
+        </ul>
+
+        <h3>Key takeaway</h3>
+        <p>
+          The Netflix half teaches the syntax, the malware half teaches the habit. One hash led to
+          an IP, the IP led to a username trail, and the trail led to a file, all by pivoting on
+          whatever the last search turned up. If I had to pick the most important log field, it's
+          source IP, because it's what ties scattered events across different logs into one
+          story.
+        </p>
+
+        <p>
+          <a href="https://github.com/codepath/opencyber-splunk-lab" target="_blank">CodePath Splunk Lab on GitHub</a>
+        </p>
+      </div>
+
+    </main>
+    <script src="../../assets/js/script.js"></script>
+  </body>
+</html>
