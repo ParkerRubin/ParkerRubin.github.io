@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+
+    <link rel="icon" type="image/svg+xml" href="../../icon/favicon.svg" />
+    <link rel="icon" type="image/png" sizes="32x32" href="../../icon/favicon-32.png" />
+    <link rel="apple-touch-icon" href="../../icon/apple-touch-icon.png" />
+
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#0A0E14" />
+    <meta name="description" content="Exploiting an FTP directory traversal, detecting it with Snort, scoping the breach from a packet capture, and beating my own rule." />
+    <title>Off Limits, Directory Traversal and Snort Detection</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+      rel="stylesheet"
+    />
+    <link href="../../assets/style/style.css" rel="stylesheet" />
+
+    <style>
+      :root {
+        --bg: #0A0E14;
+        --surface: #171D2B;
+        --ink: #E7EAF0;
+        --muted: #8891A3;
+        --line: #232B3D;
+        --accent: #8B7CF6;
+        --accent-soft: rgba(139, 124, 246, 0.09);
+        --accent-2: #2DD4BF;
+        --accent-2-soft: rgba(45, 212, 191, 0.14);
+        --accent-3: #F5A34B;
+        --accent-3-soft: rgba(245, 163, 75, 0.07);
+      }
+      .post-body h4 {
+        font-family: var(--font-display);
+        font-weight: 600;
+        font-size: 0.95rem;
+        margin: 1.6rem 0 0.6rem;
+        color: var(--accent-2);
+      }
+      .post-body pre {
+        background: var(--surface);
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        padding: 0.85rem 1rem;
+        overflow-x: auto;
+        margin: 0 0 1.4rem;
+        font-size: 0.8rem;
+        line-height: 1.5;
+      }
+      .post-body pre code {
+        background: none;
+        color: var(--ink);
+        padding: 0;
+        font-size: inherit;
+        white-space: pre;
+      }
+      .post-body img {
+        display: block;
+        width: 100%;
+        height: auto;
+        border-radius: 10px;
+        margin: 0.4rem 0 0.9rem;
+        box-shadow: 0 0 0 1px var(--line);
+        cursor: zoom-in;
+      }
+      .fig-cap {
+        font-size: 0.85rem;
+        color: var(--muted);
+        margin-top: -0.3rem;
+        margin-bottom: 1.4rem;
+      }
+      .table-wrap {
+        overflow-x: auto;
+        margin-bottom: 1.4rem;
+      }
+    </style>
+  </head>
+  <body>
+    <main class="page">
+
+      <a class="back-link" href="../../blog.html"><i class="fa-solid fa-arrow-left"></i> Back to blog</a>
+
+      <div class="post-tags">
+        <span class="tag tag-network">Network detection</span>
+      </div>
+      <h1 class="name" style="font-size: 1.8rem; text-align: left; animation: none; opacity: 1; transform: none;">
+        Off Limits, Directory Traversal and Snort Detection
+      </h1>
+      <p class="post-date">Snort NIDS, packet capture analysis, directory traversal</p>
+
+      <div class="post-body">
+        <p>
+          A full SOC loop from CodePath's CYB102 Snort Lab. Wishful Thinking Inc. runs an old
+          file service that hands back whatever path a client asks for and never checks it. I
+          started on the red side, exploiting the bug to pull files my account was locked out of,
+          then flipped to blue: write a Snort rule that catches it, scope the breach from a
+          packet capture, recommend the fix, and finally beat my own rule.
+        </p>
+
+        <h3>Objective</h3>
+        <ul>
+          <li>Exploit a directory traversal to read files outside the service's folder</li>
+          <li>Write a Snort rule that detects the traversal on the wire</li>
+          <li>Prove from a capture exactly which files an attacker reached</li>
+          <li>Recommend the fix at the source plus a defense-in-depth layer</li>
+        </ul>
+
+        <h3>The bug</h3>
+        <p>
+          The service serves files out of <code>/home/student/ftp_folder</code> on port 8888. It
+          takes the requested path, glues it onto that folder, and opens whatever comes out.
+          Nothing stops a request from walking upward with <code>../</code>. The folder sits three
+          levels below <code>/</code>, so three of them reach the filesystem root:
+        </p>
+        <pre><code>GET /../../../etc/shadow</code></pre>
+        <p>
+          The real problem is who's doing the reading. My shell ran as <code>student</code>, but
+          the service ran as root. File access follows the permissions of the process, not the
+          person asking, so the traversal didn't give me any new privileges. It just talked a
+          root process into reading files for me.
+        </p>
+
+        <h3>What came back</h3>
+        <div class="table-wrap">
+          <table>
+            <tr><th>Target</th><th>Recovered</th></tr>
+            <tr><td><code>/etc/os-release</code></td><td>Ubuntu 22.04.5 LTS (Jammy Jellyfish)</td></tr>
+            <tr><td><code>/etc/shadow</code> (root line)</td><td><code>root:*:20675:0:99999:7:::</code></td></tr>
+            <tr><td>Confidential earnings report</td><td>"Earnings are down 16%!"</td></tr>
+          </table>
+        </div>
+        <p>
+          That last one is the punchline. The public <code>general/reports.txt</code> told
+          everyone earnings were up 900%. The file my account was denied said the opposite.
+        </p>
+
+        <h3>Detecting it with Snort</h3>
+        <p>
+          On the blue side, the traversal has an obvious fingerprint: a literal
+          <code>../</code> in a request to port 8888. I added this to <code>local.rules</code>:
+        </p>
+        <pre><code>alert tcp any any -&gt; any 8888 (msg:"Directory traversal (../ in a request)"; content:"../"; sid:1000001; rev:1;)</code></pre>
+        <p>Then replayed the captured attack through it:</p>
+        <pre><code>snort -c /usr/local/etc/snort/snort.lua -r /opt/snort-lab/project/server.pcapng -A alert_fast</code></pre>
+        <p>It fired four times, once per traversal request:</p>
+        <pre><code>07/26-21:40:08.059778 [**] [1:1000001:1] "Directory traversal (../ in a request)" [**] [Priority: 0] {TCP} 127.0.0.1:59668 -&gt; 127.0.0.1:8888
+07/26-21:40:08.089675 [**] [1:1000001:1] "Directory traversal (../ in a request)" [**] [Priority: 0] {TCP} 127.0.0.1:59670 -&gt; 127.0.0.1:8888
+07/26-21:40:08.119151 [**] [1:1000001:1] "Directory traversal (../ in a request)" [**] [Priority: 0] {TCP} 127.0.0.1:59686 -&gt; 127.0.0.1:8888
+07/26-21:40:08.149591 [**] [1:1000001:1] "Directory traversal (../ in a request)" [**] [Priority: 0] {TCP} 127.0.0.1:59702 -&gt; 127.0.0.1:8888</code></pre>
+
+        <h3>Scoping the breach</h3>
+        <p>
+          An alert says something happened. Scope says what it touched. The capture held seven
+          requests, six served and one miss:
+        </p>
+        <div class="table-wrap">
+          <table>
+            <tr><th>Request</th><th>Result</th></tr>
+            <tr><td><code>/general/reports.txt</code></td><td>Served, inside FTP folder</td></tr>
+            <tr><td><code>/general/budget.txt</code></td><td>Served, inside FTP folder</td></tr>
+            <tr><td><code>/../../../etc/os-release</code></td><td><strong>Served, OUTSIDE</strong></td></tr>
+            <tr><td><code>/../../../etc/shadow</code></td><td><strong>Served, OUTSIDE</strong></td></tr>
+            <tr><td><code>/../../../etc/passwd</code></td><td><strong>Served, OUTSIDE</strong></td></tr>
+            <tr><td>Confidential earnings file</td><td><strong>Served, OUTSIDE</strong></td></tr>
+            <tr><td><code>/nonexistent.txt</code></td><td>404, nothing returned</td></tr>
+          </table>
+        </div>
+        <p>
+          Four traversal hits, matching the four alerts exactly. Two of them, <code>shadow</code>
+          and the earnings file, are the ones that matter for impact.
+        </p>
+
+        <h3>Remediation</h3>
+        <p>
+          <strong>Fix at the source:</strong> canonicalize the path before opening it. Resolve the
+          <code>../</code> components with something like <code>path.resolve</code> or
+          <code>realpath</code>, then refuse the request unless the result still sits inside the
+          FTP root. Right now the server just appends the request to its folder and opens
+          whatever that points to.
+        </p>
+        <p>
+          <strong>Defense in depth:</strong> stop running the service as root. Run it as an
+          unprivileged user that can't read anything outside its own folder, so even if a
+          traversal bug slips back in, there's nothing sensitive for it to hand over.
+        </p>
+
+        <h3>Beating my own rule</h3>
+        <p>
+          A rule that matches three literal bytes only catches attackers who don't try. I sent
+          the same request URL-encoded, so <code>../</code> never appears on the wire:
+        </p>
+        <pre><code>GET /%2e%2e%2f%2e%2e%2f%2e%2e%2fetc/shadow</code></pre>
+        <p>
+          200 OK, full <code>/etc/shadow</code> back, zero alerts. The server runs
+          <code>decodeURIComponent()</code> on the URL, turning <code>%2e%2e%2f</code> back into
+          <code>../</code> after it's already past the sensor. Different bytes on the wire, same
+          traversal on the server. A second rule catches the encoded form, with
+          <code>nocase</code> covering <code>%2E%2E%2F</code> too:
+        </p>
+        <pre><code>alert tcp any any -&gt; any 8888 (msg:"Directory traversal (encoded ../)"; content:"%2e%2e%2f"; nocase; sid:1000003; rev:1;)</code></pre>
+        <div class="callout">
+          Even two rules aren't the end of it. Double encoding, mixed encodings and backslashes
+          are all other ways to spell the same thing. That's the real case for the source-side
+          fix: canonicalizing the path catches every spelling, a signature only catches the ones
+          you thought of.
+        </div>
+
+        <h3>Tools used</h3>
+        <ul>
+          <li>Snort 3 in Docker, custom <code>local.rules</code>, <code>alert_fast</code> output</li>
+          <li>tcpdump for reading the capture</li>
+          <li>A raw HTTP request script for the traversal and the encoded bypass</li>
+        </ul>
+
+        <h3>Key takeaway</h3>
+        <p>
+          Doing both sides of the same attack made the limits of each obvious. The exploit worked
+          because a root process trusted user input. The first detection worked until I changed
+          how I spelled the attack. Signatures are good for catching the lazy version and for
+          scoping after the fact, but the fix that actually closes the hole lives in the code and
+          in what the service is allowed to touch.
+        </p>
+
+        <p>
+          <a href="https://github.com/codepath/opencyber-snort-lab" target="_blank">CodePath Snort NIDS Lab on GitHub</a>
+        </p>
+      </div>
+
+    </main>
+    <script src="../../assets/js/script.js"></script>
+  </body>
+</html>
